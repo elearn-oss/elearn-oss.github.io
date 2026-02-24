@@ -184,8 +184,9 @@
         },
 
         // Course Page
-        'POST:STCoursepage.aspx/GetInfo': function (d) {
-            return JSON.stringify(courseInfo(d.id || '1001'));
+        'POST:STCoursepage.aspx/GetInfo': function () {
+            var id = localStorage.getItem('TeCoInId') || '1001';
+            return JSON.stringify(courseInfo(id));
         },
         'POST:STCoursepage.aspx/LearningFileList': function () {
             return JSON.stringify(LEARNING_FILES);
