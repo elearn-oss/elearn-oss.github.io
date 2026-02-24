@@ -368,10 +368,15 @@
                 window.location.reload();
             });
 
+            localStorage.setItem('elearn_proxy_url', 'https://elearn-cors-proxy.elearn-oss.workers.dev');
+
             if (btnSaveProxy) {
                 btnSaveProxy.addEventListener('click', function () {
                     var proxyUrl = proxyInput ? proxyInput.value.trim() : '';
                     if (proxyUrl) {
+                        if (localStorage.elearn_proxy_url != '') {
+                            showToast('پروکسی به صورت پیشفرض قرار داده شده است. شما در حال ویرایش و قرار دادن پروکسی جدید هستید', 'info');
+                        }
                         localStorage.setItem('elearn_proxy_url', proxyUrl);
                         showToast('آدرس پروکسی ذخیره شد.', 'success');
                     } else {
