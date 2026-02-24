@@ -33,6 +33,7 @@ const CORS_HEADERS = {
     'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Accept, X-Requested-With',
+    'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Max-Age': '86400',
 };
 
@@ -80,6 +81,22 @@ export default {
         Object.entries(CORS_HEADERS).forEach(function ([key, value]) {
             responseHeaders.set(key, value);
         });
+
+        // Sanitize Set-Cookie headers so the browser stores them for the proxy
+        // domain instead of the university domain. Remove any 'domain' attribute
+        // and ensure SameSite=None so cookies work in a cross-site proxy context.
+        try {
+            const setCookies = response.headers.getAll('set-cookie');
+            if (setCookies && setCookies.length > 0) {
+                responseHeaders.delete('set-cookie');
+                setCookies.forEach(function (cookie) {
+                    var sanitised = cookie
+                        .replace(/;\s*domain=[^;,]*/gi, '')
+                        .replace(/;\s*samesite=[^;,]*/gi, '');
+                    responseHeaders.append('set-cookie', sanitised + '; SameSite=None; Secure');
+                });
+            }
+        } catch (_) { /* getAll not available – leave Set-Cookie as-is */ }
 
         return new Response(response.body, {
             status: response.status,

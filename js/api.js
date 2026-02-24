@@ -44,10 +44,9 @@ function getApiBase() {
  * @returns {Promise<*>} Unwrapped response data (result.d)
  */
 function apiPost(url, data) {
-    // credentials: 'omit' is required for cross-origin CORS requests to the
-    // university server. Session state is tracked via the ASP.NET session
-    // cookie; if the server is configured with Access-Control-Allow-Credentials
-    // use 'include' instead and ensure the server sends the correct headers.
+    // credentials: 'include' is required so the browser sends and stores the
+    // ASP.NET session cookie for the CORS proxy domain. The Cloudflare Worker
+    // must respond with Access-Control-Allow-Credentials: true for this to work.
     return fetch(getApiBase() + url, {
         method: 'POST',
         headers: {
@@ -57,7 +56,7 @@ function apiPost(url, data) {
         },
         body: JSON.stringify(data || {}),
         mode: 'cors',
-        credentials: 'omit'
+        credentials: 'include'
     })
     .then(function (response) {
         if (!response.ok) {
@@ -104,7 +103,7 @@ function apiGet(url, data) {
             'X-Requested-With': 'XMLHttpRequest'
         },
         mode: 'cors',
-        credentials: 'omit'
+        credentials: 'include'
     })
     .then(function (response) {
         if (!response.ok) {
@@ -181,8 +180,8 @@ function apiGetCourseInfo() {
 /** Get paginated list of learning files */
 function apiGetLearningFiles(startpage, rowcount) {
     return apiPost('STCoursepage.aspx/LearningFileList', {
-        startpage: startpage,
-        rowcount: rowcount
+        startpage: String(startpage),
+        rowcount: String(rowcount)
     });
 }
 
@@ -209,8 +208,8 @@ function apiGetTarh() {
 /** Get paginated list of exercise files */
 function apiGetExerciseFiles(startpage, rowcount) {
     return apiPost('STCoursepage.aspx/ExerciseFileList', {
-        startpage: startpage,
-        rowcount: rowcount
+        startpage: String(startpage),
+        rowcount: String(rowcount)
     });
 }
 
@@ -266,17 +265,58 @@ function apiViewMessage(msgId) {
     return apiPost('STCoursepage.aspx/Viewmessage', { msgId: msgId });
 }
 
-/** Get paginated list of course messages */
-function apiGetMessageList(startpage, rowcount) {
-    return apiPost('STCoursepage.aspx/MessageList', {
-        startpage: startpage,
-        rowcount: rowcount
+/** Get attendance list for current course (DataTable GET format) */
+function apiGetAttendanceList() {
+    // These are jQuery DataTables v1 server-side processing parameters, matching
+    // the exact request the real university browser sends (captured via browser
+    // devtools). mDataProp_1='function' is the DataTables v1 convention meaning
+    // the client renders column 1 via a custom function rather than a raw value.
+    return apiGet('STCoursepage.aspx/GetAttendanceList', {
+        sEcho: '1',
+        iColumns: '5',
+        sColumns: ',,,,',
+        iDisplayStart: '0',
+        iDisplayLength: '100',
+        mDataProp_0: '0',
+        sSearch_0: '', bRegex_0: 'false', bSearchable_0: 'true', bSortable_0: 'false',
+        mDataProp_1: 'function', // client-rendered column
+        sSearch_1: '', bRegex_1: 'false', bSearchable_1: 'true', bSortable_1: 'true',
+        mDataProp_2: '2',
+        sSearch_2: '', bRegex_2: 'false', bSearchable_2: 'true', bSortable_2: 'true',
+        mDataProp_3: '3',
+        sSearch_3: '', bRegex_3: 'false', bSearchable_3: 'true', bSortable_3: 'false',
+        mDataProp_4: '4',
+        sSearch_4: '', bRegex_4: 'false', bSearchable_4: 'true', bSortable_4: 'false',
+        sSearch: '', bRegex: 'false',
+        iSortCol_0: '2', sSortDir_0: 'desc', iSortingCols: '1'
     });
 }
 
-/** Get attendance list for current course */
-function apiGetAttendanceList() {
-    return apiPost('STCoursepage.aspx/AttendanceList', {});
+/** Get paginated list of course messages (DataTable GET format) */
+function apiGetMessageList(page, rowcount) {
+    var iDisplayStart = ((page || 1) - 1) * (rowcount || 10);
+    var iDisplayLength = rowcount || 10;
+    // 'TeCoInId' is the localStorage key set by course.html from the ?id= query
+    // parameter; it corresponds to the TCInfoID required by GetMessageList.
+    var tcInfoId = localStorage.getItem('TeCoInId') || '';
+    return apiGet('STCoursepage.aspx/GetMessageList', {
+        sEcho: '1',
+        iColumns: '4',
+        sColumns: ',,,',
+        iDisplayStart: String(iDisplayStart),
+        iDisplayLength: String(iDisplayLength),
+        mDataProp_0: '0',
+        sSearch_0: '', bRegex_0: 'false', bSearchable_0: 'true', bSortable_0: 'false',
+        mDataProp_1: 'function', // client-rendered column (title)
+        sSearch_1: '', bRegex_1: 'false', bSearchable_1: 'true', bSortable_1: 'true',
+        mDataProp_2: 'function', // client-rendered column (date)
+        sSearch_2: '', bRegex_2: 'false', bSearchable_2: 'true', bSortable_2: 'true',
+        mDataProp_3: '3',
+        sSearch_3: '', bRegex_3: 'false', bSearchable_3: 'true', bSortable_3: 'false',
+        sSearch: '', bRegex: 'false',
+        iSortCol_0: '2', sSortDir_0: 'desc', iSortingCols: '1',
+        TCInfoID: tcInfoId
+    });
 }
 
 /** Upload an answer file via multipart form */
@@ -288,7 +328,7 @@ function apiUploadAnswerFile(file, guid) {
         method: 'POST',
         body: formData,
         mode: 'cors',
-        credentials: 'omit'
+        credentials: 'include'
     }).then(function (r) {
         if (!r.ok) throw new Error('Upload failed');
         return r.text();
