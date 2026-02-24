@@ -781,7 +781,7 @@
         function loadLearningFiles(page, rowcount) {
             rowcount = rowcount || 5;
             showLoading();
-            apiGetLearningFiles(page, rowcount)
+            apiGetLearningFiles(page - 1, rowcount)
                 .then(function (data) {
                     var result;
                     try { result = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { result = null; }
@@ -878,7 +878,7 @@
         function loadExercises(page, rowcount) {
             rowcount = rowcount || 5;
             showLoading();
-            apiGetExerciseFiles(page, rowcount)
+            apiGetExerciseFiles(page - 1, rowcount)
                 .then(function (data) {
                     var result;
                     try { result = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { result = null; }
@@ -1222,7 +1222,16 @@
                     var items = [];
                     var totalCount = 0;
 
-                    if (result && result.Item1) {
+                    if (result && result.aaData) {
+                        items = result.aaData;
+                        totalCount = parseInt(result.iTotalRecords, 10) || items.length;
+                        // Normalize array rows to expected object format
+                        if (items.length > 0 && Array.isArray(items[0])) {
+                            items = items.map(function (row) {
+                                return { MsgTitle: row[1] || '', MsgDate: row[2] || '', MsgId: String(row[0] || ''), MsgBody: row[3] || '' };
+                            });
+                        }
+                    } else if (result && result.Item1) {
                         try { items = typeof result.Item1 === 'string' ? JSON.parse(result.Item1) : result.Item1; } catch (e) { items = []; }
                         totalCount = parseInt(result.Item2, 10) || 0;
                     } else if (Array.isArray(result)) {
@@ -1303,7 +1312,15 @@
                     var items = [];
                     try {
                         var result = typeof data === 'string' ? JSON.parse(data) : data;
-                        if (result && result.Item1) {
+                        if (result && result.aaData) {
+                            items = result.aaData;
+                            // Normalize array rows: [row_num, ?, date, status, time]
+                            if (items.length > 0 && Array.isArray(items[0])) {
+                                items = items.map(function (row) {
+                                    return { AttDate: row[2] || '', IsPresent: row[3] === 1 || row[3] === true || row[3] === '1', AttTime: row[4] || '' };
+                                });
+                            }
+                        } else if (result && result.Item1) {
                             items = typeof result.Item1 === 'string' ? JSON.parse(result.Item1) : result.Item1;
                         } else if (Array.isArray(result)) {
                             items = result;

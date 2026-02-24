@@ -227,11 +227,15 @@
         'POST:STCoursepage.aspx/SendCheckAnswer': function () { return 'ok'; },
         'POST:STCoursepage.aspx/ViewExercise': function () { return 'ok'; },
         'POST:STCoursepage.aspx/Viewmessage': function () { return 'ok'; },
-        'POST:STCoursepage.aspx/MessageList': function () {
-            return JSON.stringify(MESSAGES);
+        'GET:STCoursepage.aspx/GetMessageList': function (d) {
+            var start = parseInt(d.iDisplayStart, 10) || 0;
+            var length = parseInt(d.iDisplayLength, 10) || 10;
+            var total = MESSAGES.length;
+            var page_items = length < 0 ? MESSAGES : MESSAGES.slice(start, start + length);
+            return { sEcho: d.sEcho || '1', iTotalRecords: total, iTotalDisplayRecords: total, aaData: page_items };
         },
-        'POST:STCoursepage.aspx/AttendanceList': function () {
-            return JSON.stringify(ATTENDANCE);
+        'GET:STCoursepage.aspx/GetAttendanceList': function () {
+            return { sEcho: '1', iTotalRecords: ATTENDANCE.length, iTotalDisplayRecords: ATTENDANCE.length, aaData: ATTENDANCE };
         },
         'POST:UploadHandler.ashx': function () { return 'ok'; },
 
