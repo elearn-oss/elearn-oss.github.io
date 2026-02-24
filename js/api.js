@@ -214,9 +214,7 @@ function apiGetClassLink(tcguid) {
 
 /** Get course information for current context */
 function apiGetCourseInfo() {
-    return apiPost('STCoursepage.aspx/GetInfo', {
-        id: localStorage.getItem('TeCoInId') || ''
-    });
+    return apiPost('STCoursepage.aspx/GetInfo', {});
 }
 
 /** Get paginated list of learning files */
