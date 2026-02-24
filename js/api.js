@@ -14,6 +14,12 @@
 var API_BASE = 'https://elearn.uk.ac.ir/';
 
 /**
+ * Maximum time (ms) to wait for the course-context priming GET before
+ * proceeding with course API calls anyway (best-effort).
+ */
+var COURSE_CONTEXT_TIMEOUT_MS = 10000;
+
+/**
  * Returns the effective API base URL.
  *
  * When a CORS proxy URL is stored in localStorage under 'elearn_proxy_url',
@@ -174,6 +180,9 @@ function apiGetSTClasses() {
  *
  * This function is a no-op in demo/mock mode (elearn_mode !== 'real').
  *
+ * A hard timeout of 10 seconds is applied so that a slow or unresponsive
+ * server never prevents the course page from loading entirely.
+ *
  * @param {string} clid - The CLid GUID for the course (TCInfoGuiID)
  * @returns {Promise<void>}
  */
@@ -181,14 +190,17 @@ function apiInitCourseContext(clid) {
     if (!clid || localStorage.getItem('elearn_mode') !== 'real') {
         return Promise.resolve();
     }
-    return fetch(getApiBase() + 'STCoursepage.aspx?CLid=' + encodeURIComponent(clid), {
+    var fetchPromise = fetch(getApiBase() + 'STCoursepage.aspx?CLid=' + encodeURIComponent(clid), {
         method: 'GET',
         mode: 'cors',
         credentials: 'include'
     }).then(
         function () { /* discard the HTML body; session cookie side-effect is all we need */ },
-        function () { /* best-effort: ignore network errors, AJAX calls will surface failures */ }
+        function (err) { console.warn('[elearn] Course context init failed:', err); }
     );
+    // Resolve after COURSE_CONTEXT_TIMEOUT_MS at the latest so a hanging request never blocks the page.
+    var timeoutPromise = new Promise(function (resolve) { setTimeout(resolve, COURSE_CONTEXT_TIMEOUT_MS); });
+    return Promise.race([fetchPromise, timeoutPromise]);
 }
 
 /** Get the online class link for a given class GUID */
@@ -202,7 +214,9 @@ function apiGetClassLink(tcguid) {
 
 /** Get course information for current context */
 function apiGetCourseInfo() {
-    return apiPost('STCoursepage.aspx/GetInfo', {});
+    return apiPost('STCoursepage.aspx/GetInfo', {
+        id: localStorage.getItem('TeCoInId') || ''
+    });
 }
 
 /** Get paginated list of learning files */
