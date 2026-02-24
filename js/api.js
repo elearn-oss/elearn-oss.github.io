@@ -7,18 +7,11 @@
 /**
  * Base URL for API calls.
  *
- * When served through server.py on localhost the proxy handles routing,
- * so a relative URL (empty string) is used — no CORS issues.
- * When opened directly from any other origin, fall back to the absolute URL
- * (works if the server allows cross-origin requests, or when deployed on the
- * university's own domain).
- *
+ * Always points directly at the university backend.
  * In demo/mock mode this value is irrelevant because mock.js overrides
  * apiPost() and apiGet() completely.
  */
-var _isLocalhost = (window.location.hostname === 'localhost' ||
-                    window.location.hostname === '127.0.0.1');
-var API_BASE = _isLocalhost ? '' : 'https://elearn.uk.ac.ir/';
+var API_BASE = 'https://elearn.uk.ac.ir/';
 
 // ============================================================
 // Generic Request Helpers
@@ -32,11 +25,20 @@ var API_BASE = _isLocalhost ? '' : 'https://elearn.uk.ac.ir/';
  * @returns {Promise<*>} Unwrapped response data (result.d)
  */
 function apiPost(url, data) {
+    // credentials: 'omit' is required for cross-origin CORS requests to the
+    // university server. Session state is tracked via the ASP.NET session
+    // cookie; if the server is configured with Access-Control-Allow-Credentials
+    // use 'include' instead and ensure the server sends the correct headers.
     return fetch(API_BASE + url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        headers: {
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Content-Type': 'application/json; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
         body: JSON.stringify(data || {}),
-        credentials: 'include'
+        mode: 'cors',
+        credentials: 'omit'
     })
     .then(function (response) {
         if (!response.ok) {
@@ -77,8 +79,13 @@ function apiGet(url, data) {
 
     return fetch(API_BASE + url + queryString, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json; charset=utf-8' },
-        credentials: 'include'
+        headers: {
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Content-Type': 'application/json; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        mode: 'cors',
+        credentials: 'omit'
     })
     .then(function (response) {
         if (!response.ok) {
@@ -261,7 +268,8 @@ function apiUploadAnswerFile(file, guid) {
     return fetch(API_BASE + 'UploadHandler.ashx', {
         method: 'POST',
         body: formData,
-        credentials: 'include'
+        mode: 'cors',
+        credentials: 'omit'
     }).then(function (r) {
         if (!r.ok) throw new Error('Upload failed');
         return r.text();

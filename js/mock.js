@@ -3,12 +3,11 @@
  *
  * Overrides apiPost() and apiGet() (defined in api.js) with in-memory
  * implementations so the site works as a pure static frontend with no
- * server needed.
+ * network connection needed.
  *
- * Real-API mode (connect to elearn.uk.ac.ir via server.py proxy):
+ * Real-API mode (connect directly to elearn.uk.ac.ir):
  *   Set  localStorage.setItem('elearn_mode', 'real')
- *   or click the mode toggle on the login page, then run:
- *       python3 server.py
+ *   or click the mode toggle on the login page.
  *
  * Demo mode (default, no internet needed):
  *   student1 / student1  (دانشجو)
@@ -21,8 +20,7 @@
 
     // ── Real-API mode: skip all overrides ────────────────────
     if (localStorage.getItem('elearn_mode') === 'real') {
-        console.info('[elearn] حالت اتصال به سایت دانشگاه فعال است. ' +
-                     'مطمئن شوید server.py در حال اجراست.');
+        console.info('[elearn] حالت اتصال به سایت دانشگاه فعال است.');
         return;
     }
 
