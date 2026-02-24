@@ -524,7 +524,7 @@
                 html += '<div class="stat-item"><span class="stat-icon">📝</span><span class="stat-val">' + exCount + '</span> تمرین</div>';
                 html += '</div>';
                 html += '<div class="card-actions">';
-                html += '<a href="course.html?id=' + tcId + '" class="btn btn-primary">ورود به درس</a>';
+                html += '<a href="course.html?id=' + tcId + (tcGuid ? '&clid=' + encodeURIComponent(tcGuid) : '') + '" class="btn btn-primary">ورود به درس</a>';
                 if (onTime) {
                     html += '<button class="btn btn-accent btn-online-class" data-tcguid="' + escapeHtml(tcGuid) + '">کلاس آنلاین</button>';
                 }

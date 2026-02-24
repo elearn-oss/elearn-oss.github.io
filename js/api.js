@@ -163,6 +163,34 @@ function apiGetSTClasses() {
     return apiGet('STClasslist.aspx/GetSTClasses');
 }
 
+/**
+ * Prime the server-side ASP.NET session with the given course CLid.
+ *
+ * The university backend stores the active course in its session the first
+ * time a browser GETs STCoursepage.aspx?CLid=<guid>. Every subsequent AJAX
+ * call (GetInfo, LearningFileList, …) then reads the CLid from that session.
+ * Since our SPA never navigates to that URL, we must fire this synthetic GET
+ * before calling any STCoursepage endpoint.
+ *
+ * This function is a no-op in demo/mock mode (elearn_mode !== 'real').
+ *
+ * @param {string} clid - The CLid GUID for the course (TCInfoGuiID)
+ * @returns {Promise<void>}
+ */
+function apiInitCourseContext(clid) {
+    if (!clid || localStorage.getItem('elearn_mode') !== 'real') {
+        return Promise.resolve();
+    }
+    return fetch(getApiBase() + 'STCoursepage.aspx?CLid=' + encodeURIComponent(clid), {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include'
+    }).then(
+        function () { /* discard the HTML body; session cookie side-effect is all we need */ },
+        function () { /* best-effort: ignore network errors, AJAX calls will surface failures */ }
+    );
+}
+
 /** Get the online class link for a given class GUID */
 function apiGetClassLink(tcguid) {
     return apiPost('STClasslist.aspx/GetClassLink', { tcguid: tcguid });

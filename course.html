@@ -654,20 +654,32 @@
         checkAuth();
 
         var TCInfoID = getQueryParam('id');
+        var CLid = getQueryParam('clid');
         if (!TCInfoID) {
             showToast('شناسه درس یافت نشد', 'error');
             setTimeout(function () { window.location.href = 'dashboard.html'; }, 1500);
             return;
         }
         localStorage.setItem('TeCoInId', TCInfoID);
+        if (CLid) {
+            localStorage.setItem('TeCoInClid', CLid);
+        }
 
         apiSetTime().catch(function (err) {
             console.warn('Time sync failed:', err);
         });
 
         loadNotifications();
-        loadCourseInfo();
-        loadLearningFiles(1);
+
+        // Prime the server-side session with the course CLid before making any
+        // STCoursepage AJAX calls; without this the server returns HTTP 500.
+        apiInitCourseContext(CLid || localStorage.getItem('TeCoInClid') || '').then(function () {
+            loadCourseInfo();
+            loadLearningFiles(1);
+        }).catch(function () {
+            showToast('خطا در اتصال به سرور. لطفاً صفحه را مجدداً بارگذاری کنید.', 'error');
+            hideLoading();
+        });
 
         window.addEventListener('load', function () { hideLoading(); });
 
