@@ -13,6 +13,25 @@
  */
 var API_BASE = 'https://elearn.uk.ac.ir/';
 
+/**
+ * Returns the effective API base URL.
+ *
+ * When a CORS proxy URL is stored in localStorage under 'elearn_proxy_url',
+ * all requests are routed through it instead of calling elearn.uk.ac.ir
+ * directly. This is required in real mode because the university server does
+ * not send Access-Control-Allow-Origin headers and the browser blocks
+ * cross-origin requests from the GitHub Pages origin.
+ *
+ * @returns {string} The base URL (with trailing slash) to use for API calls.
+ */
+function getApiBase() {
+    var proxy = localStorage.getItem('elearn_proxy_url');
+    if (proxy) {
+        return proxy.replace(/\/$/, '') + '/';
+    }
+    return API_BASE;
+}
+
 // ============================================================
 // Generic Request Helpers
 // ============================================================
@@ -29,7 +48,7 @@ function apiPost(url, data) {
     // university server. Session state is tracked via the ASP.NET session
     // cookie; if the server is configured with Access-Control-Allow-Credentials
     // use 'include' instead and ensure the server sends the correct headers.
-    return fetch(API_BASE + url, {
+    return fetch(getApiBase() + url, {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -77,7 +96,7 @@ function apiGet(url, data) {
         if (queryString) queryString = '?' + queryString;
     }
 
-    return fetch(API_BASE + url + queryString, {
+    return fetch(getApiBase() + url + queryString, {
         method: 'GET',
         headers: {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -265,7 +284,7 @@ function apiUploadAnswerFile(file, guid) {
     var formData = new FormData();
     formData.append('file', file);
     formData.append('guid', guid);
-    return fetch(API_BASE + 'UploadHandler.ashx', {
+    return fetch(getApiBase() + 'UploadHandler.ashx', {
         method: 'POST',
         body: formData,
         mode: 'cors',

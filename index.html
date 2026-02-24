@@ -307,8 +307,23 @@
             line-height: 1.7;
             text-align: right;
         ">
-            در این حالت مستقیماً به سایت دانشگاه متصل می‌شوید.<br>
-            برای دسترسی بهتر مطمئن شوید اینترنت فعال است.
+            در این حالت درخواست‌ها از طریق یک پروکسی CORS به سایت دانشگاه ارسال می‌شوند.<br>
+            آدرس پروکسی CORS خود را وارد کنید (مثلاً یک Cloudflare Worker):
+            <div style="margin-top:8px; display:flex; gap:6px; align-items:center;">
+                <input id="proxy-url-input" type="url"
+                    placeholder="https://my-worker.workers.dev/"
+                    style="flex:1; padding:6px 10px; border-radius:6px;
+                        border:1px solid rgba(255,255,255,0.2);
+                        background:rgba(255,255,255,0.08); color:#fff;
+                        font-family:'Vazirmatn',sans-serif; font-size:0.76rem;
+                        outline:none; direction:ltr;">
+                <button id="btn-save-proxy" style="
+                    padding:6px 12px; border-radius:6px;
+                    border:1px solid rgba(255,255,255,0.18);
+                    background:rgba(255,255,255,0.10); color:#fff;
+                    font-family:'Vazirmatn',sans-serif; font-size:0.76rem;
+                    cursor:pointer;">ذخیره</button>
+            </div>
         </div>
     </div>
 
@@ -323,6 +338,8 @@
             var modeLabel  = document.getElementById('mode-label');
             var btnSwitch  = document.getElementById('btn-switch-mode');
             var proxyHint  = document.getElementById('proxy-hint');
+            var proxyInput = document.getElementById('proxy-url-input');
+            var btnSaveProxy = document.getElementById('btn-save-proxy');
 
             function getCurrentMode() {
                 return localStorage.getItem('elearn_mode') || 'demo';
@@ -333,6 +350,7 @@
                     modeLabel.innerHTML   = '🌐 حالت اتصال به سایت دانشگاه';
                     btnSwitch.textContent = 'تغییر به حالت دمو';
                     proxyHint.style.display = 'block';
+                    if (proxyInput) proxyInput.value = localStorage.getItem('elearn_proxy_url') || '';
                     var fpLink = document.getElementById('forgot-pass-link');
                     if (fpLink) fpLink.href = 'ForgetPass.aspx';
                 } else {
@@ -349,6 +367,19 @@
                 localStorage.setItem('elearn_mode', next);
                 window.location.reload();
             });
+
+            if (btnSaveProxy) {
+                btnSaveProxy.addEventListener('click', function () {
+                    var proxyUrl = proxyInput ? proxyInput.value.trim() : '';
+                    if (proxyUrl) {
+                        localStorage.setItem('elearn_proxy_url', proxyUrl);
+                        showToast('آدرس پروکسی ذخیره شد.', 'success');
+                    } else {
+                        localStorage.removeItem('elearn_proxy_url');
+                        showToast('آدرس پروکسی حذف شد.', 'info');
+                    }
+                });
+            }
 
             updateModeUI(getCurrentMode());
 
