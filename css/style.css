@@ -11,15 +11,15 @@
    ========================================================================== */
 :root {
   /* ---- Colour palette ---- */
-  --color-primary:       #4361ee;
-  --color-primary-light:  #6b83f2;
-  --color-primary-dark:   #2b44c7;
-  --color-primary-rgb:    67, 97, 238;
+  --color-primary:       #0ea5e9;
+  --color-primary-light:  #38bdf8;
+  --color-primary-dark:   #0284c7;
+  --color-primary-rgb:    14, 165, 233;
 
-  --color-accent:        #7209b7;
-  --color-accent-light:  #9b4dca;
-  --color-accent-dark:   #560a86;
-  --color-accent-rgb:    114, 9, 183;
+  --color-accent:        #f43f5e;
+  --color-accent-light:  #fb7185;
+  --color-accent-dark:   #e11d48;
+  --color-accent-rgb:    244, 63, 94;
 
   --color-success:       #06d6a0;
   --color-success-light: #39e5b6;
@@ -43,7 +43,7 @@
   --bg-sidebar:          #ffffff;
   --bg-navbar:           rgba(255, 255, 255, 0.72);
   --bg-input:            #ffffff;
-  --bg-hover:            rgba(67, 97, 238, 0.06);
+  --bg-hover:            rgba(14, 165, 233, 0.06);
 
   /* ---- Text ---- */
   --text-primary:        #1a1a2e;
@@ -112,7 +112,7 @@
   --bg-sidebar:      #16162a;
   --bg-navbar:       rgba(22, 22, 42, 0.82);
   --bg-input:        #22223a;
-  --bg-hover:        rgba(67, 97, 238, 0.12);
+  --bg-hover:        rgba(14, 165, 233, 0.12);
 
   --text-primary:    #e8e8f0;
   --text-secondary:  #9ca3c0;
