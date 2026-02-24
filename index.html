@@ -307,18 +307,8 @@
             line-height: 1.7;
             text-align: right;
         ">
-            برای اتصال به سایت دانشگاه، یک بار در ترمینال اجرا کنید:<br>
-            <code style="
-                display: inline-block;
-                margin-top: 6px;
-                padding: 4px 10px;
-                border-radius: 6px;
-                background: rgba(0,0,0,0.3);
-                font-family: monospace;
-                font-size: 0.85rem;
-                color: #a78bfa;
-                direction: ltr;
-            ">python3 server.py</code>
+            در این حالت مستقیماً به سایت دانشگاه متصل می‌شوید.<br>
+            برای دسترسی بهتر مطمئن شوید اینترنت فعال است.
         </div>
     </div>
 
@@ -415,7 +405,7 @@
                     }
                 }).catch(function (err) {
                     if (getCurrentMode() === 'real') {
-                        showToast('خطا در اتصال. مطمئن شوید server.py در حال اجراست.', 'error');
+                        showToast('خطا در اتصال به سایت دانشگاه. لطفاً اتصال اینترنت را بررسی کنید.', 'error');
                     } else {
                         showToast('خطا در ورود.', 'error');
                     }
