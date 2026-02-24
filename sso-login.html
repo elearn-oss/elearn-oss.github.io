@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود SSO | سامانه ایلرن</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a1a4e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #fff;
+            text-align: center;
+        }
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 48px 40px;
+            max-width: 420px;
+            width: 90%;
+        }
+        .icon { font-size: 3rem; margin-bottom: 16px; }
+        h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+        p  { color: rgba(255,255,255,0.65); font-size: 0.9rem; line-height: 1.7; margin-bottom: 24px; }
+        a {
+            display: inline-block;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: box-shadow 0.2s;
+        }
+        a:hover { box-shadow: 0 6px 24px rgba(124,58,237,0.55); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">🔲</div>
+        <h1>ورود از طریق پنجره هوشمند دانشگاهی</h1>
+        <p>این روش ورود در نسخه آفلاین در دسترس نیست.<br>
+        برای ورود از نام کاربری و رمز عبور دانشگاهی استفاده کنید.</p>
+        <a href="index.html">بازگشت به صفحه ورود</a>
+    </div>
+</body>
+</html>

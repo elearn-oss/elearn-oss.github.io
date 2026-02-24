@@ -1,1 +1,437 @@
-TEST
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه ایلرن | دانشگاه شهید باهنر کرمان</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a1a4e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.05); }
+        }
+
+        /* Page Loader */
+        #page-loader {
+            position: fixed; inset: 0;
+            background: #0f0c29;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #page-loader.hidden { opacity: 0; visibility: hidden; }
+
+        .loader-spinner {
+            width: 48px; height: 48px;
+            border: 4px solid rgba(255,255,255,0.15);
+            border-top-color: #a78bfa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Login Card */
+        .login-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 48px 40px 36px;
+            width: 100%;
+            max-width: 420px;
+            margin: 20px;
+            animation: fadeInUp 0.8s ease forwards;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        }
+
+        .logo-wrapper {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .logo-wrapper svg {
+            width: 64px; height: 64px;
+            filter: drop-shadow(0 0 12px rgba(167, 139, 250, 0.5));
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .brand-title {
+            text-align: center;
+            color: #fff;
+            font-size: 1.65rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .brand-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.88rem;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            direction: rtl;
+        }
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .form-group input:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            color: #fff;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 24px rgba(124, 58, 237, 0.55);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .links {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .links a {
+            color: rgba(255, 255, 255, 0.55);
+            text-decoration: none;
+            font-size: 0.82rem;
+            transition: color 0.3s;
+        }
+        .links a:hover { color: #a78bfa; }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.75rem;
+            margin-top: 24px;
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed; inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .particles span {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: rgba(167, 139, 250, 0.3);
+            border-radius: 50%;
+            animation: float linear infinite;
+        }
+        @keyframes float {
+            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        .login-card, .footer { position: relative; z-index: 1; }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 36px 24px 28px; margin: 16px; }
+            .brand-title { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="page-loader"><div class="loader-spinner"></div></div>
+
+    <div class="particles" aria-hidden="true">
+        <span style="left:10%; animation-duration:11s; animation-delay:0s; width:3px; height:3px;"></span>
+        <span style="left:25%; animation-duration:14s; animation-delay:2s; width:5px; height:5px;"></span>
+        <span style="left:40%; animation-duration:10s; animation-delay:4s;"></span>
+        <span style="left:55%; animation-duration:13s; animation-delay:1s; width:6px; height:6px;"></span>
+        <span style="left:70%; animation-duration:12s; animation-delay:3s; width:3px; height:3px;"></span>
+        <span style="left:85%; animation-duration:15s; animation-delay:5s;"></span>
+        <span style="left:15%; animation-duration:9s;  animation-delay:6s; width:5px; height:5px;"></span>
+        <span style="left:60%; animation-duration:11s; animation-delay:7s;"></span>
+    </div>
+
+    <div class="login-card">
+        <div class="logo-wrapper">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M32 4L4 20l28 16 28-16L32 4z" fill="#a78bfa" opacity="0.9"/>
+                <path d="M4 20v12l28 16 28-16V20L32 36 4 20z" fill="#7c3aed" opacity="0.7"/>
+                <rect x="8" y="30" width="4" height="18" rx="2" fill="#a78bfa" opacity="0.6"/>
+                <circle cx="10" cy="50" r="4" fill="#a78bfa" opacity="0.5"/>
+                <path d="M52 28v14c0 6-8 10-20 10s-20-4-20-10V28" stroke="#c4b5fd" stroke-width="2" fill="none" opacity="0.4"/>
+            </svg>
+        </div>
+
+        <h1 class="brand-title">سامانه ایلرن</h1>
+        <p class="brand-subtitle">دانشگاه شهید باهنر کرمان</p>
+
+        <div class="form-group">
+            <label for="username">نام کاربری</label>
+            <input type="text" id="username" placeholder="شماره دانشجویی / شماره استادی" autocomplete="username">
+        </div>
+
+        <div class="form-group">
+            <label for="password">رمز عبور</label>
+            <input type="password" id="password" placeholder="رمز عبور خود را وارد کنید" autocomplete="current-password">
+        </div>
+
+        <button class="btn btn-primary" id="btn-login">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            ورود
+        </button>
+
+        <a href="sso-login.html" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            ورود از طریق پنجره هوشمند دانشگاهی
+        </a>
+
+        <div class="links">
+            <a href="forget-pass.html" id="forgot-pass-link">رمز عبورتان را فراموش کرده اید؟</a>
+            <a href="https://support.uk.ac.ir/" target="_blank" rel="noopener">سامانه پشتیبانی آنلاین</a>
+        </div>
+
+        <!-- ── Connection mode toggle ── -->
+        <div id="mode-bar" style="
+            margin-top: 20px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.10);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px; font-size: 0.82rem;
+        ">
+            <span id="mode-label" style="color:rgba(255,255,255,0.7);"></span>
+            <button id="btn-switch-mode" style="
+                padding: 5px 14px;
+                border-radius: 8px;
+                border: 1px solid rgba(255,255,255,0.18);
+                background: rgba(255,255,255,0.10);
+                color: #fff;
+                font-family: 'Vazirmatn', sans-serif;
+                font-size: 0.78rem;
+                cursor: pointer;
+                transition: background 0.2s;
+            "></button>
+        </div>
+        <div id="proxy-hint" style="
+            display:none;
+            margin-top:8px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(167,139,250,0.12);
+            border: 1px solid rgba(167,139,250,0.25);
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.7;
+            text-align: right;
+        ">
+            برای اتصال به سایت دانشگاه، یک بار در ترمینال اجرا کنید:<br>
+            <code style="
+                display: inline-block;
+                margin-top: 6px;
+                padding: 4px 10px;
+                border-radius: 6px;
+                background: rgba(0,0,0,0.3);
+                font-family: monospace;
+                font-size: 0.85rem;
+                color: #a78bfa;
+                direction: ltr;
+            ">python3 server.py</code>
+        </div>
+    </div>
+
+    <p class="footer">تمامی حقوق متعلق به دانشگاه شهید باهنر می باشد</p>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/mock.js"></script>
+    <script>
+        (function () {
+            // ── Mode toggle helpers ──────────────────────────────────────
+            var modeLabel  = document.getElementById('mode-label');
+            var btnSwitch  = document.getElementById('btn-switch-mode');
+            var proxyHint  = document.getElementById('proxy-hint');
+
+            function getCurrentMode() {
+                return localStorage.getItem('elearn_mode') || 'demo';
+            }
+
+            function updateModeUI(mode) {
+                if (mode === 'real') {
+                    modeLabel.innerHTML   = '🌐 حالت اتصال به سایت دانشگاه';
+                    btnSwitch.textContent = 'تغییر به حالت دمو';
+                    proxyHint.style.display = 'block';
+                    var fpLink = document.getElementById('forgot-pass-link');
+                    if (fpLink) fpLink.href = 'ForgetPass.aspx';
+                } else {
+                    modeLabel.innerHTML   = '📋 حالت دمو (آفلاین)';
+                    btnSwitch.textContent = 'اتصال به سایت دانشگاه';
+                    proxyHint.style.display = 'none';
+                    var fpLink = document.getElementById('forgot-pass-link');
+                    if (fpLink) fpLink.href = 'forget-pass.html';
+                }
+            }
+
+            btnSwitch.addEventListener('click', function () {
+                var next = getCurrentMode() === 'real' ? 'demo' : 'real';
+                localStorage.setItem('elearn_mode', next);
+                window.location.reload();
+            });
+
+            updateModeUI(getCurrentMode());
+
+            // ── Page init ────────────────────────────────────────────────
+            // Clear session-specific keys on login page, preserving mode preference
+            localStorage.removeItem('username');
+            localStorage.removeItem('utype');
+            localStorage.removeItem('_mock_user');
+
+            window.addEventListener('load', function () {
+                var loader = document.getElementById('page-loader');
+                if (loader) loader.classList.add('hidden');
+            });
+
+            var btnLogin = document.getElementById('btn-login');
+            var passwordField = document.getElementById('password');
+
+            function doLogin() {
+                var username = document.getElementById('username').value.trim();
+                var password = document.getElementById('password').value;
+
+                if (!username || !password) {
+                    showToast('لطفاً نام کاربری و رمز عبور را وارد کنید.', 'warning');
+                    return;
+                }
+
+                apiLogin(username, password, '0').then(function (result) {
+                    if (result.Item1 === 'ok') {
+                        localStorage.setItem('utype', result.Item2);
+                        localStorage.setItem('username', username);
+                        var utype = parseInt(result.Item2, 10);
+
+                        switch (utype) {
+                            case 1:  // student
+                            case 2:  // teacher
+                            case 3:
+                            case 5:
+                            case 7:
+                            default:
+                                window.location.href = 'dashboard.html';
+                                break;
+                        }
+                    } else if (result.Item1 === 'notexists') {
+                        showToast('خطای ورود به سامانه!', 'error');
+                    } else if (result.Item1 === 'adcerror' || result.Item1 === 'weberror') {
+                        showToast('نام کاربری یا کلمه عبور اشتباه است!', 'error');
+                    } else if (result.Item1 === 'same') {
+                        if (confirm('رمز عبور شما نیاز به تغییر دارد. آیا مایل به تغییر رمز عبور هستید؟')) {
+                            // In real mode, ForgetPass.aspx is proxied to the university server
+                            window.location.href = getCurrentMode() === 'real'
+                                ? 'ForgetPass.aspx'
+                                : 'forget-pass.html';
+                        }
+                    }
+                }).catch(function (err) {
+                    if (getCurrentMode() === 'real') {
+                        showToast('خطا در اتصال. مطمئن شوید server.py در حال اجراست.', 'error');
+                    } else {
+                        showToast('خطا در ورود.', 'error');
+                    }
+                    console.error('Login error:', err);
+                });
+            }
+
+            btnLogin.addEventListener('click', doLogin);
+
+            passwordField.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    doLogin();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

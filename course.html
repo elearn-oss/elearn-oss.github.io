@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحه درس | سامانه ایلرن</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ---- Page Loader ---- */
+        #page-loader {
+            position: fixed; inset: 0;
+            background: var(--bg-body);
+            display: none; align-items: center; justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.4s ease;
+        }
+        #page-loader.active { display: flex; }
+
+        .loader-spinner {
+            width: 44px; height: 44px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* ---- Navbar ---- */
+        .navbar {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: var(--navbar-height);
+            z-index: 1030;
+            display: flex; align-items: center;
+            padding: 0 var(--space-5);
+            background: var(--bg-navbar);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .navbar-right,
+        .navbar-left { display: flex; align-items: center; gap: var(--space-3); }
+        .navbar-right { flex: 1; }
+
+        .navbar-logo {
+            font-weight: 800; font-size: var(--font-size-xl);
+            color: var(--color-primary);
+            margin-right: var(--space-3);
+        }
+
+        .hamburger {
+            display: none; background: none; border: none;
+            color: var(--text-secondary); font-size: 1.5rem;
+            cursor: pointer; padding: var(--space-1);
+            border-radius: var(--border-radius-sm);
+            transition: background var(--transition-fast);
+        }
+        .hamburger:hover { background: var(--bg-hover); }
+
+        .navbar-menu { display: flex; align-items: center; gap: var(--space-2); }
+
+        .nav-icon-btn {
+            position: relative;
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: var(--border-radius);
+            background: none; border: none;
+            color: var(--text-secondary); font-size: 1.25rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .nav-icon-btn:hover { background: var(--bg-hover); color: var(--color-primary); }
+
+        .nav-badge {
+            position: absolute; top: 2px; left: 2px;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            font-size: 0.65rem; font-weight: 700;
+            background: var(--color-danger); color: #fff;
+            border-radius: var(--border-radius-full);
+            display: none; align-items: center; justify-content: center;
+            line-height: 1;
+        }
+        .nav-badge.visible { display: flex; }
+
+        .user-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            color: #fff; font-weight: 700; font-size: var(--font-size-sm);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        #nav-username {
+            font-weight: 600; font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .btn-logout {
+            background: none; border: none;
+            color: var(--text-muted); font-size: 1.2rem;
+            cursor: pointer; padding: var(--space-1);
+            border-radius: var(--border-radius-sm);
+            transition: color var(--transition-fast);
+        }
+        .btn-logout:hover { color: var(--color-danger); }
+
+        /* ---- Notification Dropdown ---- */
+        .notification-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0;
+            width: 340px; max-height: 400px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow-y: auto;
+            opacity: 0; visibility: hidden;
+            transform: translateY(8px);
+            transition: all var(--transition-fast);
+            z-index: 1050;
+        }
+        .notification-dropdown.show {
+            opacity: 1; visibility: visible; transform: translateY(0);
+        }
+        .notif-header {
+            padding: var(--space-3) var(--space-4);
+            font-weight: 700; font-size: var(--font-size-sm);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .notif-item {
+            padding: var(--space-3) var(--space-4);
+            font-size: var(--font-size-sm);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            transition: background var(--transition-fast);
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: var(--bg-hover); }
+        .notif-empty {
+            padding: var(--space-6) var(--space-4);
+            text-align: center;
+            color: var(--text-muted); font-size: var(--font-size-sm);
+        }
+
+        /* ---- Sidebar ---- */
+        .sidebar {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: var(--sidebar-width);
+            z-index: 1040;
+            background: var(--bg-sidebar);
+            border-left: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            transition: transform var(--transition-base);
+        }
+
+        .sidebar-header {
+            display: flex; align-items: center;
+            height: var(--navbar-height);
+            padding: 0 var(--space-4);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sidebar-header .logo-text {
+            font-weight: 700; font-size: var(--font-size-lg);
+            color: var(--color-primary);
+        }
+
+        .sidebar-nav {
+            flex: 1; list-style: none;
+            padding: var(--space-3) 0;
+            overflow-y: auto;
+        }
+        .sidebar-nav li a {
+            display: flex; align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-2) var(--space-4);
+            margin: 2px var(--space-2);
+            border-radius: var(--border-radius);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm); font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        .sidebar-nav li a:hover { background: var(--bg-hover); color: var(--color-primary); }
+        .sidebar-nav li.active > a {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.30);
+        }
+        .sidebar-nav li a .icon { font-size: 1.25rem; flex-shrink: 0; width: 24px; text-align: center; }
+
+        .sidebar-term-box {
+            padding: var(--space-4);
+            margin: var(--space-3);
+            border-radius: var(--border-radius);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.10);
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+        }
+        .sidebar-term-box .term-title {
+            font-weight: 700; font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+        .sidebar-term-box .term-row {
+            display: flex; justify-content: space-between;
+            padding: 2px 0;
+        }
+
+        /* ---- Main Content ---- */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            padding: var(--space-5);
+            padding-top: calc(var(--navbar-height) + var(--space-5));
+            min-height: 100vh;
+            transition: margin-right var(--transition-base);
+            animation: fadeIn 0.4s ease both;
+        }
+
+        /* ---- Sidebar Overlay ---- */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 1035;
+            transition: opacity var(--transition-base);
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* ---- Course Info Card ---- */
+        .course-info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-5);
+            margin-bottom: var(--space-5);
+            animation: fadeInUp 0.45s ease both;
+        }
+        .course-info-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            flex-wrap: wrap; gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+        .course-info-title {
+            font-size: var(--font-size-xl); font-weight: 800;
+            color: var(--text-primary); margin: 0 0 var(--space-2) 0;
+        }
+        .course-info-meta {
+            display: flex; flex-wrap: wrap; gap: var(--space-4);
+            font-size: var(--font-size-sm); color: var(--text-secondary);
+        }
+        .course-info-meta .meta-item {
+            display: flex; align-items: center; gap: var(--space-1);
+        }
+        .course-info-actions {
+            display: flex; gap: var(--space-2); flex-shrink: 0;
+        }
+        .teacher-message {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.12);
+            border-radius: var(--border-radius);
+            padding: var(--space-3) var(--space-4);
+            margin-top: var(--space-3);
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .teacher-message .msg-label {
+            font-weight: 700; color: var(--color-primary);
+            margin-bottom: var(--space-1); display: block;
+        }
+
+        /* ---- Learning File Items ---- */
+        .learn-file-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            transition: all var(--transition-fast);
+            animation: fadeInUp 0.35s ease both;
+            cursor: pointer;
+        }
+        .learn-file-item:hover {
+            border-color: rgba(var(--color-primary-rgb), 0.3);
+            box-shadow: var(--shadow-sm);
+        }
+        .learn-file-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: var(--space-3); margin-bottom: var(--space-2);
+        }
+        .learn-file-title {
+            font-weight: 700; font-size: var(--font-size-base);
+            color: var(--text-primary); margin: 0;
+        }
+        .learn-file-desc {
+            font-size: var(--font-size-sm); color: var(--text-secondary);
+            margin-bottom: var(--space-2); line-height: 1.6;
+        }
+        .learn-file-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: var(--space-2);
+            font-size: var(--font-size-xs); color: var(--text-muted);
+        }
+        .learn-file-footer .file-meta {
+            display: flex; align-items: center; gap: var(--space-3);
+        }
+
+        /* ---- Exercise Items ---- */
+        .exercise-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            transition: all var(--transition-fast);
+            animation: fadeInUp 0.35s ease both;
+            cursor: pointer;
+        }
+        .exercise-item:hover {
+            border-color: rgba(var(--color-primary-rgb), 0.3);
+            box-shadow: var(--shadow-sm);
+        }
+        .exercise-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: var(--space-3); margin-bottom: var(--space-2);
+        }
+        .exercise-title {
+            font-weight: 700; font-size: var(--font-size-base);
+            color: var(--text-primary); margin: 0;
+        }
+        .exercise-desc {
+            font-size: var(--font-size-sm); color: var(--text-secondary);
+            margin-bottom: var(--space-3); line-height: 1.6;
+        }
+        .exercise-footer {
+            display: flex; align-items: center; flex-wrap: wrap;
+            gap: var(--space-3);
+            font-size: var(--font-size-xs); color: var(--text-muted);
+        }
+
+        /* ---- Message Table ---- */
+        .msg-body-row {
+            background: rgba(var(--color-primary-rgb), 0.03);
+        }
+        .msg-body-row td {
+            padding: var(--space-4) !important;
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ---- Exercise Modal ---- */
+        #exercise-modal .modal-dialog {
+            max-width: 640px;
+        }
+        .exercise-detail-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+        .exercise-detail-item {
+            font-size: var(--font-size-sm);
+        }
+        .exercise-detail-item .detail-label {
+            color: var(--text-muted); font-size: var(--font-size-xs);
+            margin-bottom: 2px;
+        }
+        .exercise-detail-item .detail-value {
+            color: var(--text-primary); font-weight: 600;
+        }
+        .answer-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: var(--space-4);
+            margin-top: var(--space-4);
+        }
+        .answer-section h4 {
+            font-size: var(--font-size-base); font-weight: 700;
+            color: var(--text-primary); margin: 0 0 var(--space-3) 0;
+        }
+        .existing-answer {
+            background: rgba(var(--color-success), 0.06);
+            border: 1px solid rgba(6, 214, 160, 0.2);
+            border-radius: var(--border-radius);
+            padding: var(--space-3) var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+        .existing-answer .answer-label {
+            font-size: var(--font-size-xs); color: var(--text-muted);
+            margin-bottom: var(--space-1);
+        }
+        .existing-answer .answer-text {
+            font-size: var(--font-size-sm); color: var(--text-primary);
+        }
+        .existing-answer-actions {
+            display: flex; gap: var(--space-2); margin-top: var(--space-3);
+        }
+
+        /* ---- Empty State ---- */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-8);
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: var(--space-3); }
+
+        /* ---- Pagination wrapper ---- */
+        .pagination-wrapper {
+            display: flex; justify-content: center;
+            margin-top: var(--space-5);
+        }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 991.98px) {
+            .hamburger { display: flex; }
+            .sidebar { transform: translateX(100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-xl); }
+            .main-content { margin-right: 0; }
+            .navbar { right: 0; }
+            #nav-username { display: none; }
+            .course-info-header { flex-direction: column; }
+            .exercise-detail-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 575.98px) {
+            .notification-dropdown { width: calc(100vw - 2rem); left: auto; right: 0; }
+            .course-info-actions { flex-direction: column; width: 100%; }
+            .course-info-actions .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="page-loader" class="active"><div class="loader-spinner"></div></div>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-right">
+            <button class="hamburger" id="hamburger-btn" aria-label="منو">☰</button>
+            <span class="navbar-logo">ایلرن</span>
+        </div>
+        <div class="navbar-menu">
+            <div style="position:relative">
+                <button class="nav-icon-btn" id="notif-btn" aria-label="اعلان‌ها">
+                    🔔
+                    <span class="nav-badge" id="notif-badge">0</span>
+                </button>
+                <div class="notification-dropdown" id="notif-dropdown">
+                    <div class="notif-header">اعلان‌ها</div>
+                    <div id="notif-list">
+                        <div class="notif-empty">اعلان جدیدی وجود ندارد</div>
+                    </div>
+                </div>
+            </div>
+            <a class="nav-icon-btn" href="chat.html" aria-label="پیام‌ها">
+                💬
+                <span class="nav-badge" id="msg-badge">0</span>
+            </a>
+            <div class="user-avatar" id="user-avatar"></div>
+            <span id="nav-username"></span>
+            <button class="btn-logout" id="btn-logout" aria-label="خروج" title="خروج">⏻</button>
+        </div>
+    </nav>
+
+    <!-- Sidebar (no active item) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo-text">ایلرن</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="dashboard.html">
+                    <span class="icon">📚</span>
+                    <span>درس‌های من</span>
+                </a>
+            </li>
+            <li>
+                <a href="meetings.html">
+                    <span class="icon">🎥</span>
+                    <span>جلسات من</span>
+                </a>
+            </li>
+            <li>
+                <a href="chat.html">
+                    <span class="icon">💬</span>
+                    <span>پیام‌ها</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-term-box">
+            <div class="term-title" id="term-name">—</div>
+            <div class="term-row"><span>شروع ترم:</span><span id="term-start">—</span></div>
+            <div class="term-row"><span>پایان ترم:</span><span id="term-end">—</span></div>
+            <div class="term-row"><span>شروع ثبت‌نام:</span><span id="reg-start">—</span></div>
+            <div class="term-row"><span>پایان ثبت‌نام:</span><span id="reg-end">—</span></div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <ul class="breadcrumb">
+            <li><a href="dashboard.html">خانه</a></li>
+            <li><a href="dashboard.html">درس‌های من</a></li>
+            <li class="current" id="breadcrumb-course">—</li>
+        </ul>
+
+        <!-- Course Info Card -->
+        <div class="course-info-card">
+            <div class="course-info-header">
+                <div>
+                    <h1 class="course-info-title" id="course-name">—</h1>
+                    <div class="course-info-meta">
+                        <span class="meta-item">👨‍🏫 استاد: <strong id="teacher-name">—</strong></span>
+                        <span class="meta-item">👥 تعداد دانشجو: <strong id="student-count">—</strong></span>
+                        <span class="meta-item">📅 امتحان: <strong id="exam-date">—</strong></span>
+                    </div>
+                </div>
+                <div class="course-info-actions">
+                    <button class="btn btn-outline btn-sm" id="btn-sarfasl">📋 سرفصل درس</button>
+                    <button class="btn btn-outline btn-sm" id="btn-tarh">📑 طرح درس</button>
+                </div>
+            </div>
+            <div class="teacher-message" id="teacher-message-box" style="display:none">
+                <span class="msg-label">💬 پیام استاد:</span>
+                <span id="teacher-message"></span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" role="tablist">
+            <button class="tab-link active" data-tab="tab-learning" role="tab" aria-selected="true">📄 فایل‌های آموزشی</button>
+            <button class="tab-link" data-tab="tab-exercises" role="tab" aria-selected="false">📝 تمرین‌ها</button>
+            <button class="tab-link" data-tab="tab-messages" role="tab" aria-selected="false">✉️ پیام‌ها</button>
+            <button class="tab-link" data-tab="tab-attendance" role="tab" aria-selected="false">📊 حضور و غیاب</button>
+        </div>
+
+        <!-- Tab 1: Learning Files -->
+        <div class="tab-content" id="tab-learning" role="tabpanel">
+            <div id="learning-list"></div>
+            <div class="pagination-wrapper" id="learning-pagination"></div>
+        </div>
+
+        <!-- Tab 2: Exercises -->
+        <div class="tab-content" id="tab-exercises" role="tabpanel" style="display:none">
+            <div id="exercises-list"></div>
+            <div class="pagination-wrapper" id="exercises-pagination"></div>
+        </div>
+
+        <!-- Tab 3: Messages -->
+        <div class="tab-content" id="tab-messages" role="tabpanel" style="display:none">
+            <div class="table-wrapper">
+                <table class="table table-striped" id="messages-table">
+                    <thead>
+                        <tr>
+                            <th>ردیف</th>
+                            <th>عنوان</th>
+                            <th>تاریخ</th>
+                            <th>مشاهده</th>
+                        </tr>
+                    </thead>
+                    <tbody id="messages-tbody"></tbody>
+                </table>
+            </div>
+            <div class="pagination-wrapper" id="messages-pagination"></div>
+        </div>
+
+        <!-- Tab 4: Attendance -->
+        <div class="tab-content" id="tab-attendance" role="tabpanel" style="display:none">
+            <div class="table-wrapper">
+                <table class="table table-striped" id="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>ردیف</th>
+                            <th>تاریخ</th>
+                            <th>ساعت</th>
+                            <th>وضعیت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Exercise Modal -->
+    <div class="modal-backdrop" id="exercise-backdrop"></div>
+    <div class="modal" id="exercise-modal" role="dialog" aria-modal="true">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-exercise-title">—</h3>
+                <button class="modal-close" id="modal-close-btn" aria-label="بستن">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-exercise-desc" style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-4);line-height:1.7"></div>
+
+                <div class="exercise-detail-grid" id="modal-exercise-details"></div>
+
+                <div style="margin-bottom:var(--space-4)">
+                    <button class="btn btn-primary btn-sm" id="modal-btn-download-ex">📥 دانلود فایل تمرین</button>
+                </div>
+
+                <!-- Answer Section -->
+                <div class="answer-section" id="answer-section">
+                    <h4>ارسال پاسخ</h4>
+
+                    <!-- Existing answer (shown when already answered) -->
+                    <div class="existing-answer" id="existing-answer" style="display:none">
+                        <div class="answer-label">پاسخ ارسال‌شده:</div>
+                        <div class="answer-text" id="existing-answer-text"></div>
+                        <div class="existing-answer-actions">
+                            <button class="btn btn-sm btn-outline" id="btn-download-answer">📥 دانلود فایل پاسخ</button>
+                            <button class="btn btn-sm btn-danger" id="btn-delete-answer">🗑️ حذف پاسخ</button>
+                        </div>
+                    </div>
+
+                    <!-- Answer form (shown when active and no answer yet) -->
+                    <div id="answer-form">
+                        <div class="form-group" style="margin-bottom:var(--space-3)">
+                            <label style="font-size:var(--font-size-sm);font-weight:600;margin-bottom:var(--space-1);display:block">توضیحات پاسخ</label>
+                            <textarea class="form-control" id="answer-desc" rows="3" placeholder="توضیحات خود را وارد کنید..."></textarea>
+                        </div>
+
+                        <div class="file-upload-area" id="upload-area">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">فایل خود را اینجا <strong>بکشید و رها کنید</strong> یا کلیک کنید</div>
+                            <div class="upload-hint">حداکثر حجم فایل: ۵۰ مگابایت</div>
+                            <input type="file" id="answer-file" style="display:none">
+                        </div>
+                        <div id="selected-file-info" style="display:none;margin-top:var(--space-2);font-size:var(--font-size-sm);color:var(--text-secondary)"></div>
+
+                        <div style="margin-top:var(--space-4);display:flex;gap:var(--space-2)">
+                            <button class="btn btn-primary" id="btn-submit-answer">ارسال پاسخ</button>
+                            <button class="btn btn-ghost" id="modal-cancel-btn">انصراف</button>
+                        </div>
+                    </div>
+
+                    <!-- Expired message -->
+                    <div id="expired-message" style="display:none;text-align:center;padding:var(--space-4);color:var(--color-danger);font-size:var(--font-size-sm)">
+                        ⏰ مهلت ارسال پاسخ به پایان رسیده است.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/mock.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+    (function () {
+        // ---- Auth & Init ----
+        checkAuth();
+
+        var TCInfoID = getQueryParam('id');
+        if (!TCInfoID) {
+            showToast('شناسه درس یافت نشد', 'error');
+            setTimeout(function () { window.location.href = 'dashboard.html'; }, 1500);
+            return;
+        }
+        localStorage.setItem('TeCoInId', TCInfoID);
+
+        apiSetTime().catch(function (err) {
+            console.warn('Time sync failed:', err);
+        });
+
+        loadNotifications();
+        loadCourseInfo();
+        loadLearningFiles(1);
+
+        window.addEventListener('load', function () { hideLoading(); });
+
+        // ---- State ----
+        var tabsLoaded = { learning: false, exercises: false, messages: false, attendance: false };
+        var currentExerciseId = null;
+
+        function formatExamDateTime(dateStr, timeStr) {
+            if (!dateStr) return '—';
+            var formatted = pdatefull(dateStr) || dateStr;
+            return timeStr ? formatted + ' - ' + timeStr : formatted;
+        }
+
+        // ---- Course Info ----
+        function loadCourseInfo() {
+            showLoading();
+            apiGetCourseInfo()
+                .then(function (data) {
+                    var info;
+                    try { info = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { info = null; }
+                    if (!info) return;
+
+                    var parsed = Array.isArray(info) ? info[0] : info;
+                    if (!parsed) return;
+
+                    var name = parsed.className || parsed.classname || parsed.CourseName || '—';
+                    document.getElementById('course-name').textContent = name;
+                    document.getElementById('breadcrumb-course').textContent = name;
+                    document.title = name + ' | سامانه ایلرن';
+
+                    document.getElementById('teacher-name').textContent = parsed.TeacherName || parsed.teachername || '—';
+                    document.getElementById('student-count').textContent = parsed.StudentCount || parsed.studentcount || '—';
+
+                    var examDate = parsed.ExamDate || parsed.examdate || '';
+                    var examTime = parsed.ExamTime || parsed.examtime || '';
+                    document.getElementById('exam-date').textContent = formatExamDateTime(examDate, examTime);
+
+                    var msg = parsed.TeacherMessage || parsed.teachermessage || '';
+                    if (msg) {
+                        document.getElementById('teacher-message').textContent = msg;
+                        document.getElementById('teacher-message-box').style.display = '';
+                    }
+                })
+                .catch(function () {
+                    showToast('خطا در بارگذاری اطلاعات درس', 'error');
+                })
+                .finally(function () { hideLoading(); });
+        }
+
+        // ---- Syllabus & Plan Downloads ----
+        document.getElementById('btn-sarfasl').addEventListener('click', function () {
+            showLoading();
+            apiGetSarfasl()
+                .then(function (data) {
+                    if (data && typeof data === 'string' && data !== 'null' && data !== '') {
+                        window.location.href = 'DownLoad.ashx?' + data;
+                    } else {
+                        showToast('سرفصل درس موجود نیست', 'warning');
+                    }
+                })
+                .catch(function () { showToast('خطا در دریافت سرفصل', 'error'); })
+                .finally(function () { hideLoading(); });
+        });
+
+        document.getElementById('btn-tarh').addEventListener('click', function () {
+            showLoading();
+            apiGetTarh()
+                .then(function (data) {
+                    if (data && typeof data === 'string' && data !== 'null' && data !== '') {
+                        window.location.href = 'DownLoad.ashx?' + data;
+                    } else {
+                        showToast('طرح درس موجود نیست', 'warning');
+                    }
+                })
+                .catch(function () { showToast('خطا در دریافت طرح درس', 'error'); })
+                .finally(function () { hideLoading(); });
+        });
+
+        // ---- Tab Switching ----
+        var tabBtns = document.querySelectorAll('.tab-link[data-tab]');
+        var tabPanels = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var targetId = this.getAttribute('data-tab');
+
+                tabBtns.forEach(function (b) {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+
+                tabPanels.forEach(function (p) { p.style.display = 'none'; });
+                document.getElementById(targetId).style.display = '';
+
+                // Lazy-load tab data
+                if (targetId === 'tab-learning' && !tabsLoaded.learning) {
+                    loadLearningFiles(1);
+                } else if (targetId === 'tab-exercises' && !tabsLoaded.exercises) {
+                    loadExercises(1);
+                } else if (targetId === 'tab-messages' && !tabsLoaded.messages) {
+                    loadMessages(1);
+                } else if (targetId === 'tab-attendance' && !tabsLoaded.attendance) {
+                    loadAttendance();
+                }
+            });
+        });
+
+        // ---- Learning Files ----
+        function loadLearningFiles(page, rowcount) {
+            rowcount = rowcount || 5;
+            showLoading();
+            apiGetLearningFiles(page, rowcount)
+                .then(function (data) {
+                    var result;
+                    try { result = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { result = null; }
+
+                    var items = [];
+                    var totalCount = 0;
+
+                    if (result && result.Item1) {
+                        try { items = typeof result.Item1 === 'string' ? JSON.parse(result.Item1) : result.Item1; } catch (e) { items = []; }
+                        totalCount = parseInt(result.Item2, 10) || 0;
+                    } else if (Array.isArray(result)) {
+                        items = result;
+                        totalCount = result.length;
+                    }
+
+                    if (!Array.isArray(items)) items = [];
+                    tabsLoaded.learning = true;
+                    renderLearningFiles(items);
+                    buildPagination('learning-pagination', page, Math.ceil(totalCount / rowcount), loadLearningFiles);
+                })
+                .catch(function () {
+                    document.getElementById('learning-list').innerHTML =
+                        '<div class="empty-state"><div class="empty-icon">⚠️</div><p>خطا در بارگذاری فایل‌ها</p></div>';
+                })
+                .finally(function () { hideLoading(); });
+        }
+
+        function renderLearningFiles(items) {
+            var container = document.getElementById('learning-list');
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>فایل آموزشی یافت نشد</p></div>';
+                return;
+            }
+
+            var html = '';
+            items.forEach(function (f, i) {
+                var title = escapeHtml(f.LeTitle || f.letitle || '');
+                var desc = escapeHtml(f.LeDesc || f.ledesc || '');
+                var uploader = escapeHtml(f.UploaderName || f.uploadername || '');
+                var date = pdate(f.LeDate || f.ledate || '');
+                var leId = f.LeId || f.leid || f.LeID || '';
+                var extLink = f.LeLink || f.lelink || '';
+                var delay = (i * 0.05) + 's';
+
+                html += '<div class="learn-file-item" style="animation-delay:' + delay + '" data-leid="' + escapeHtml(String(leId)) + '">';
+                html += '<div class="learn-file-header">';
+                html += '<h3 class="learn-file-title">📄 ' + title + '</h3>';
+                html += '<button class="btn btn-sm btn-primary btn-download-learn" data-leid="' + escapeHtml(String(leId)) + '">📥 دانلود</button>';
+                html += '</div>';
+                if (desc) html += '<div class="learn-file-desc">' + desc + '</div>';
+                html += '<div class="learn-file-footer">';
+                html += '<div class="file-meta">';
+                if (uploader) html += '<span>👤 ' + uploader + '</span>';
+                if (date) html += '<span>📅 ' + date + '</span>';
+                html += '</div>';
+                if (extLink) {
+                    html += '<a href="' + escapeHtml(extLink) + '" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">🔗 لینک خارجی</a>';
+                }
+                html += '</div></div>';
+            });
+            container.innerHTML = html;
+
+            container.querySelectorAll('.btn-download-learn').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    downloadLearnFile(this.getAttribute('data-leid'));
+                });
+            });
+
+            container.querySelectorAll('.learn-file-item').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    downloadLearnFile(this.getAttribute('data-leid'));
+                });
+            });
+        }
+
+        function downloadLearnFile(leId) {
+            if (!leId) return;
+            showLoading();
+            apiViewLearningFile(leId)
+                .then(function () { return apiGetLearnFile(leId); })
+                .then(function (data) {
+                    if (data && typeof data === 'string' && data !== 'null' && data !== '') {
+                        window.location.href = 'DownLoad.ashx?' + data;
+                    } else {
+                        showToast('فایل موجود نیست', 'warning');
+                    }
+                })
+                .catch(function () { showToast('خطا در دانلود فایل', 'error'); })
+                .finally(function () { hideLoading(); });
+        }
+
+        // ---- Exercises ----
+        function loadExercises(page, rowcount) {
+            rowcount = rowcount || 5;
+            showLoading();
+            apiGetExerciseFiles(page, rowcount)
+                .then(function (data) {
+                    var result;
+                    try { result = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { result = null; }
+
+                    var items = [];
+                    var totalCount = 0;
+
+                    if (result && result.Item1) {
+                        try { items = typeof result.Item1 === 'string' ? JSON.parse(result.Item1) : result.Item1; } catch (e) { items = []; }
+                        totalCount = parseInt(result.Item2, 10) || 0;
+                    } else if (Array.isArray(result)) {
+                        items = result;
+                        totalCount = result.length;
+                    }
+
+                    if (!Array.isArray(items)) items = [];
+                    tabsLoaded.exercises = true;
+                    renderExercises(items);
+                    buildPagination('exercises-pagination', page, Math.ceil(totalCount / rowcount), loadExercises);
+                })
+                .catch(function () {
+                    document.getElementById('exercises-list').innerHTML =
+                        '<div class="empty-state"><div class="empty-icon">⚠️</div><p>خطا در بارگذاری تمرین‌ها</p></div>';
+                })
+                .finally(function () { hideLoading(); });
+        }
+
+        function renderExercises(items) {
+            var container = document.getElementById('exercises-list');
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>تمرینی یافت نشد</p></div>';
+                return;
+            }
+
+            var html = '';
+            items.forEach(function (ex, i) {
+                var title = escapeHtml(ex.ExTitle || ex.extitle || '');
+                var desc = escapeHtml(ex.ExDesc || ex.exdesc || '');
+                var startDate = pdate(ex.ExStartDate || ex.exstartdate || '');
+                var endDate = pdate(ex.ExEndDate || ex.exenddate || '');
+                var grade = ex.Grade || ex.grade || '—';
+                var excId = ex.ExcId || ex.excid || ex.ExcID || '';
+                var isActive = !ex.IsExpired && !ex.isexpired;
+                var delay = (i * 0.05) + 's';
+
+                html += '<div class="exercise-item" style="animation-delay:' + delay + '" data-excid="' + escapeHtml(String(excId)) + '">';
+                html += '<div class="exercise-header">';
+                html += '<h3 class="exercise-title">📝 ' + title + '</h3>';
+                if (isActive) {
+                    html += '<span class="badge badge-success badge-pill">فعال</span>';
+                } else {
+                    html += '<span class="badge badge-danger badge-pill">منقضی</span>';
+                }
+                html += '</div>';
+                if (desc) html += '<div class="exercise-desc">' + desc + '</div>';
+                html += '<div class="exercise-footer">';
+                if (startDate) html += '<span>📅 شروع: ' + startDate + '</span>';
+                if (endDate) html += '<span>⏰ پایان: ' + endDate + '</span>';
+                html += '<span>💯 نمره: ' + escapeHtml(String(grade)) + '</span>';
+                html += '</div></div>';
+            });
+            container.innerHTML = html;
+
+            container.querySelectorAll('.exercise-item').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    openExercise(this.getAttribute('data-excid'));
+                });
+            });
+        }
+
+        // ---- Exercise Modal ----
+        function openExercise(excId) {
+            if (!excId) return;
+            currentExerciseId = excId;
+            showLoading();
+
+            // Mark as viewed
+            apiViewExercise(excId).catch(function () {});
+
+            // Load exercise data + check validation + get answer in parallel
+            Promise.all([
+                apiGetExerciseFiles(1, 100).catch(function () { return null; }),
+                apiCheckValidation(excId).catch(function () { return null; }),
+                apiGetAnswer(excId).catch(function () { return null; })
+            ]).then(function (results) {
+                var allExercises = results[0];
+                var validation = results[1];
+                var existingAnswer = results[2];
+
+                // Find the specific exercise
+                var exercise = null;
+                try {
+                    var parsed = typeof allExercises === 'string' ? JSON.parse(allExercises) : allExercises;
+                    var list = [];
+                    if (parsed && parsed.Item1) {
+                        list = typeof parsed.Item1 === 'string' ? JSON.parse(parsed.Item1) : parsed.Item1;
+                    } else if (Array.isArray(parsed)) {
+                        list = parsed;
+                    }
+                    if (Array.isArray(list)) {
+                        exercise = list.find(function (ex) {
+                            return String(ex.ExcId || ex.excid || ex.ExcID) === String(excId);
+                        });
+                    }
+                } catch (e) { exercise = null; }
+
+                populateExerciseModal(exercise, validation, existingAnswer);
+                showModal();
+            }).finally(function () { hideLoading(); });
+        }
+
+        function populateExerciseModal(exercise, validation, existingAnswer) {
+            var titleEl = document.getElementById('modal-exercise-title');
+            var descEl = document.getElementById('modal-exercise-desc');
+            var detailsEl = document.getElementById('modal-exercise-details');
+            var answerForm = document.getElementById('answer-form');
+            var existingEl = document.getElementById('existing-answer');
+            var expiredEl = document.getElementById('expired-message');
+
+            // Reset
+            answerForm.style.display = 'none';
+            existingEl.style.display = 'none';
+            expiredEl.style.display = 'none';
+            document.getElementById('answer-desc').value = '';
+            document.getElementById('selected-file-info').style.display = 'none';
+            selectedFile = null;
+
+            if (exercise) {
+                titleEl.textContent = exercise.ExTitle || exercise.extitle || '—';
+                descEl.textContent = exercise.ExDesc || exercise.exdesc || '';
+
+                var detailHtml = '';
+                detailHtml += '<div class="exercise-detail-item"><div class="detail-label">تاریخ شروع</div><div class="detail-value">' + (pdate(exercise.ExStartDate || exercise.exstartdate) || '—') + '</div></div>';
+                detailHtml += '<div class="exercise-detail-item"><div class="detail-label">تاریخ پایان</div><div class="detail-value">' + (pdate(exercise.ExEndDate || exercise.exenddate) || '—') + '</div></div>';
+                detailHtml += '<div class="exercise-detail-item"><div class="detail-label">نمره</div><div class="detail-value">' + escapeHtml(String(exercise.Grade || exercise.grade || '—')) + '</div></div>';
+
+                var isExpired = exercise.IsExpired || exercise.isexpired;
+                detailHtml += '<div class="exercise-detail-item"><div class="detail-label">وضعیت</div><div class="detail-value">' + (isExpired ? '<span class="badge badge-danger badge-pill">منقضی</span>' : '<span class="badge badge-success badge-pill">فعال</span>') + '</div></div>';
+                detailsEl.innerHTML = detailHtml;
+            } else {
+                titleEl.textContent = '—';
+                descEl.textContent = '';
+                detailsEl.innerHTML = '';
+            }
+
+            // Check if valid/active
+            var isValid = false;
+            try {
+                if (validation !== null && validation !== undefined) {
+                    if (typeof validation === 'string') {
+                        isValid = validation === 'true' || validation === 'True' || validation === '1';
+                    } else {
+                        isValid = !!validation;
+                    }
+                }
+            } catch (e) { isValid = false; }
+
+            // Check for existing answer
+            var hasAnswer = false;
+            var answerData = null;
+            try {
+                answerData = typeof existingAnswer === 'string' ? JSON.parse(existingAnswer) : existingAnswer;
+                if (answerData && (answerData.ExAwGuid || answerData.exawguid || answerData.AnswerDesc || answerData.answerdesc)) {
+                    hasAnswer = true;
+                }
+            } catch (e) { hasAnswer = false; }
+
+            if (hasAnswer && answerData) {
+                existingEl.style.display = '';
+                document.getElementById('existing-answer-text').textContent =
+                    answerData.AnswerDesc || answerData.answerdesc || answerData.ExcDesc || answerData.excdesc || '(بدون توضیحات)';
+
+                var awGuid = answerData.ExAwGuid || answerData.exawguid || '';
+                document.getElementById('btn-download-answer').setAttribute('data-awguid', awGuid);
+                document.getElementById('btn-delete-answer').setAttribute('data-awguid', awGuid);
+
+                if (isValid) {
+                    answerForm.style.display = '';
+                }
+            } else if (isValid) {
+                answerForm.style.display = '';
+            } else {
+                expiredEl.style.display = '';
+            }
+        }
+
+        function showModal() {
+            document.getElementById('exercise-backdrop').classList.add('show');
+            document.getElementById('exercise-modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('exercise-backdrop').classList.remove('show');
+            document.getElementById('exercise-modal').classList.remove('show');
+            document.body.style.overflow = '';
+            currentExerciseId = null;
+        }
+
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+        document.getElementById('exercise-backdrop').addEventListener('click', closeModal);
+        document.getElementById('exercise-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Download exercise file
+        document.getElementById('modal-btn-download-ex').addEventListener('click', function () {
+            if (!currentExerciseId) return;
+            showLoading();
+            apiGetExFile(currentExerciseId)
+                .then(function (data) {
+                    if (data && typeof data === 'string' && data !== 'null' && data !== '') {
+                        window.location.href = 'DownLoad.ashx?' + data;
+                    } else {
+                        showToast('فایل تمرین موجود نیست', 'warning');
+                    }
+                })
+                .catch(function () { showToast('خطا در دانلود فایل تمرین', 'error'); })
+                .finally(function () { hideLoading(); });
+        });
+
+        // Download answer file
+        document.getElementById('btn-download-answer').addEventListener('click', function () {
+            var awGuid = this.getAttribute('data-awguid');
+            if (!awGuid) return;
+            showLoading();
+            apiGetAnswerFile(awGuid)
+                .then(function (data) {
+                    if (data && typeof data === 'string' && data !== 'null' && data !== '') {
+                        window.location.href = 'DownLoadAnswer.ashx?' + data;
+                    } else {
+                        showToast('فایل پاسخ موجود نیست', 'warning');
+                    }
+                })
+                .catch(function () { showToast('خطا در دانلود فایل پاسخ', 'error'); })
+                .finally(function () { hideLoading(); });
+        });
+
+        // Delete answer
+        document.getElementById('btn-delete-answer').addEventListener('click', function () {
+            var awGuid = this.getAttribute('data-awguid');
+            if (!awGuid) return;
+            showConfirm('حذف پاسخ', 'آیا از حذف پاسخ اطمینان دارید؟')
+                .then(function (confirmed) {
+                    if (!confirmed) return;
+                    showLoading();
+                    apiDeleteAnswer(awGuid)
+                        .then(function () {
+                            showToast('پاسخ با موفقیت حذف شد', 'success');
+                            if (currentExerciseId) openExercise(currentExerciseId);
+                        })
+                        .catch(function () { showToast('خطا در حذف پاسخ', 'error'); })
+                        .finally(function () { hideLoading(); });
+                });
+        });
+
+        // ---- File Upload (Drag & Drop) ----
+        var selectedFile = null;
+        var uploadArea = document.getElementById('upload-area');
+        var fileInput = document.getElementById('answer-file');
+
+        uploadArea.addEventListener('click', function () { fileInput.click(); });
+
+        uploadArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        });
+        uploadArea.addEventListener('dragleave', function () {
+            this.classList.remove('drag-over');
+        });
+        uploadArea.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+        fileInput.addEventListener('change', function () {
+            if (this.files.length > 0) {
+                handleFileSelect(this.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+            var info = document.getElementById('selected-file-info');
+            info.textContent = '📎 ' + escapeHtml(file.name) + ' (' + getFileSize(file.size) + ')';
+            info.style.display = '';
+        }
+
+        // Submit answer
+        document.getElementById('btn-submit-answer').addEventListener('click', function () {
+            if (!currentExerciseId) return;
+            var desc = document.getElementById('answer-desc').value.trim();
+
+            if (!selectedFile && !desc) {
+                showToast('لطفاً توضیحات یا فایل پاسخ را وارد کنید', 'warning');
+                return;
+            }
+
+            var fileName = selectedFile ? selectedFile.name : '';
+            var fileType = selectedFile ? selectedFile.type : '';
+            var fileSize = selectedFile ? String(selectedFile.size) : '0';
+
+            showLoading();
+            apiSaveAnswer(currentExerciseId, desc, fileName, fileType, fileSize, 'false')
+                .then(function (data) {
+                    if (data && typeof data === 'string' && data !== 'null' && data !== '' && data !== 'false') {
+                        // If there is a file to upload, upload via form post
+                        if (selectedFile) {
+                            return uploadAnswerFile(selectedFile, data);
+                        }
+                        return data;
+                    } else {
+                        throw new Error('Save failed');
+                    }
+                })
+                .then(function () {
+                    showToast('پاسخ با موفقیت ارسال شد', 'success');
+                    closeModal();
+                    loadExercises(1);
+                })
+                .catch(function () { showToast('خطا در ارسال پاسخ', 'error'); })
+                .finally(function () { hideLoading(); });
+        });
+
+        function uploadAnswerFile(file, guid) {
+            return apiUploadAnswerFile(file, guid);
+        }
+
+        // ---- Messages ----
+        function loadMessages(page, rowcount) {
+            rowcount = rowcount || 10;
+            showLoading();
+            apiGetMessageList(page, rowcount)
+                .then(function (data) {
+                    var result;
+                    try { result = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { result = null; }
+
+                    var items = [];
+                    var totalCount = 0;
+
+                    if (result && result.Item1) {
+                        try { items = typeof result.Item1 === 'string' ? JSON.parse(result.Item1) : result.Item1; } catch (e) { items = []; }
+                        totalCount = parseInt(result.Item2, 10) || 0;
+                    } else if (Array.isArray(result)) {
+                        items = result;
+                        totalCount = result.length;
+                    }
+
+                    if (!Array.isArray(items)) items = [];
+                    tabsLoaded.messages = true;
+                    renderMessages(items, page, rowcount);
+                    buildPagination('messages-pagination', page, Math.ceil(totalCount / rowcount), loadMessages);
+                })
+                .catch(function () {
+                    document.getElementById('messages-tbody').innerHTML =
+                        '<tr><td colspan="4" style="text-align:center;padding:var(--space-6);color:var(--text-muted)">خطا در بارگذاری پیام‌ها</td></tr>';
+                })
+                .finally(function () { hideLoading(); });
+        }
+
+        function renderMessages(items, page, rowcount) {
+            var tbody = document.getElementById('messages-tbody');
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:var(--space-6);color:var(--text-muted)">پیامی یافت نشد</td></tr>';
+                return;
+            }
+
+            var html = '';
+            items.forEach(function (msg, i) {
+                var rowNum = ((page - 1) * rowcount) + i + 1;
+                var title = escapeHtml(msg.MsgTitle || msg.msgtitle || msg.Title || '');
+                var date = pdate(msg.MsgDate || msg.msgdate || msg.Date || '');
+                var msgId = msg.MsgId || msg.msgid || msg.MsgID || '';
+                var body = escapeHtml(msg.MsgBody || msg.msgbody || msg.Body || '');
+
+                html += '<tr data-msgid="' + escapeHtml(String(msgId)) + '" data-body="' + body + '">';
+                html += '<td>' + rowNum + '</td>';
+                html += '<td>' + title + '</td>';
+                html += '<td>' + date + '</td>';
+                html += '<td><button class="btn btn-sm btn-ghost btn-view-msg" data-msgid="' + escapeHtml(String(msgId)) + '">👁️ مشاهده</button></td>';
+                html += '</tr>';
+            });
+            tbody.innerHTML = html;
+
+            tbody.querySelectorAll('.btn-view-msg').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var msgId = this.getAttribute('data-msgid');
+                    var row = this.closest('tr');
+                    toggleMessageBody(row, msgId);
+                });
+            });
+        }
+
+        function toggleMessageBody(row, msgId) {
+            var nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('msg-body-row')) {
+                nextRow.remove();
+                return;
+            }
+
+            // Mark as read
+            apiViewMessage(msgId).catch(function () {});
+
+            var body = row.getAttribute('data-body') || '';
+            var tr = document.createElement('tr');
+            tr.className = 'msg-body-row';
+            var td = document.createElement('td');
+            td.setAttribute('colspan', '4');
+            td.textContent = body || '(بدون محتوا)';
+            tr.appendChild(td);
+            row.parentNode.insertBefore(tr, row.nextSibling);
+        }
+
+        // ---- Attendance ----
+        function loadAttendance() {
+            showLoading();
+            apiGetAttendanceList()
+                .then(function (data) {
+                    var items = [];
+                    try {
+                        var result = typeof data === 'string' ? JSON.parse(data) : data;
+                        if (result && result.Item1) {
+                            items = typeof result.Item1 === 'string' ? JSON.parse(result.Item1) : result.Item1;
+                        } else if (Array.isArray(result)) {
+                            items = result;
+                        }
+                    } catch (e) { items = []; }
+                    if (!Array.isArray(items)) items = [];
+                    tabsLoaded.attendance = true;
+                    renderAttendance(items);
+                })
+                .catch(function () {
+                    document.getElementById('attendance-tbody').innerHTML =
+                        '<tr><td colspan="4" style="text-align:center;padding:var(--space-6);color:var(--text-muted)">خطا در بارگذاری حضور و غیاب</td></tr>';
+                })
+                .finally(function () { hideLoading(); });
+        }
+
+        function renderAttendance(items) {
+            var tbody = document.getElementById('attendance-tbody');
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:var(--space-6);color:var(--text-muted)">رکوردی یافت نشد</td></tr>';
+                return;
+            }
+
+            var html = '';
+            items.forEach(function (att, i) {
+                var date = pdate(att.AttDate || att.attdate || att.Date || '');
+                var time = ptime(att.AttDate || att.attdate || att.Time || '') || (att.AttTime || att.atttime || '');
+                var isPresent = att.IsPresent || att.ispresent || att.Status === 'present' || att.status === '1';
+                var statusText = isPresent ? '✅ حاضر' : '❌ غایب';
+
+                html += '<tr>';
+                html += '<td>' + (i + 1) + '</td>';
+                html += '<td>' + date + '</td>';
+                html += '<td>' + escapeHtml(time) + '</td>';
+                html += '<td>' + statusText + '</td>';
+                html += '</tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        // ---- Pagination Builder ----
+        function buildPagination(containerId, currentPage, totalPages, callback) {
+            var container = document.getElementById(containerId);
+            if (!container) return;
+            if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+            var html = '<ul class="pagination">';
+
+            // Previous
+            html += '<li class="page-item' + (currentPage <= 1 ? ' disabled' : '') + '">';
+            html += '<button class="page-link" data-page="' + (currentPage - 1) + '">‹</button></li>';
+
+            // Page numbers
+            var startPage = Math.max(1, currentPage - 2);
+            var endPage = Math.min(totalPages, currentPage + 2);
+
+            if (startPage > 1) {
+                html += '<li class="page-item"><button class="page-link" data-page="1">1</button></li>';
+                if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+            }
+
+            for (var p = startPage; p <= endPage; p++) {
+                html += '<li class="page-item' + (p === currentPage ? ' active' : '') + '">';
+                html += '<button class="page-link" data-page="' + p + '">' + p + '</button></li>';
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+                html += '<li class="page-item"><button class="page-link" data-page="' + totalPages + '">' + totalPages + '</button></li>';
+            }
+
+            // Next
+            html += '<li class="page-item' + (currentPage >= totalPages ? ' disabled' : '') + '">';
+            html += '<button class="page-link" data-page="' + (currentPage + 1) + '">›</button></li>';
+
+            html += '</ul>';
+            container.innerHTML = html;
+
+            container.querySelectorAll('.page-link[data-page]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var pg = parseInt(this.getAttribute('data-page'), 10);
+                    if (pg >= 1 && pg <= totalPages) callback(pg);
+                });
+            });
+        }
+
+        // ---- Notifications ----
+        function loadNotifications() {
+            apiGetNotifications()
+                .then(function (data) {
+                    if (!data) return;
+
+                    var notifications = [];
+                    try {
+                        notifications = typeof data.Item1 === 'string' ? JSON.parse(data.Item1) : (data.Item1 || []);
+                    } catch (e) { notifications = []; }
+                    if (!Array.isArray(notifications)) notifications = [];
+
+                    var notifCount = parseInt(data.Item2, 10) || 0;
+
+                    var badge = document.getElementById('notif-badge');
+                    if (notifCount > 0) {
+                        badge.textContent = notifCount;
+                        badge.classList.add('visible');
+                    }
+
+                    var listEl = document.getElementById('notif-list');
+                    if (notifications.length === 0) {
+                        listEl.innerHTML = '<div class="notif-empty">اعلان جدیدی وجود ندارد</div>';
+                    } else {
+                        var nhtml = '';
+                        notifications.forEach(function (n) {
+                            nhtml += '<div class="notif-item">' + escapeHtml(n.title || n.text || String(n)) + '</div>';
+                        });
+                        listEl.innerHTML = nhtml;
+                    }
+
+                    // Term info
+                    var termInfo = null;
+                    try {
+                        termInfo = typeof data.Item3 === 'string' ? JSON.parse(data.Item3) : data.Item3;
+                    } catch (e) { termInfo = null; }
+
+                    if (termInfo) {
+                        var tn = document.getElementById('term-name');
+                        var ts = document.getElementById('term-start');
+                        var te = document.getElementById('term-end');
+                        var rs = document.getElementById('reg-start');
+                        var re = document.getElementById('reg-end');
+                        if (tn) tn.textContent = termInfo.TermName || '—';
+                        if (ts) ts.textContent = pdate(termInfo.TermStart) || '—';
+                        if (te) te.textContent = pdate(termInfo.TermEnd) || '—';
+                        if (rs) rs.textContent = pdate(termInfo.reregsdate) || '—';
+                        if (re) re.textContent = pdate(termInfo.reregedate) || '—';
+                    }
+
+                    // Username
+                    var username = data.Item4 || getUserName();
+                    if (username) {
+                        var unEl = document.getElementById('nav-username');
+                        if (unEl) unEl.textContent = username;
+                        localStorage.setItem('username', username);
+                        var avEl = document.getElementById('user-avatar');
+                        if (avEl) avEl.textContent = username.charAt(0).toUpperCase();
+                    }
+                })
+                .catch(function () {
+                    var storedName = getUserName();
+                    if (storedName) {
+                        var unEl = document.getElementById('nav-username');
+                        if (unEl) unEl.textContent = storedName;
+                        var avEl = document.getElementById('user-avatar');
+                        if (avEl) avEl.textContent = storedName.charAt(0).toUpperCase();
+                    }
+                });
+        }
+
+        // ---- Notification Dropdown Toggle ----
+        var notifBtn = document.getElementById('notif-btn');
+        var notifDropdown = document.getElementById('notif-dropdown');
+
+        notifBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!notifDropdown.contains(e.target) && e.target !== notifBtn) {
+                notifDropdown.classList.remove('show');
+            }
+        });
+
+        // ---- Sidebar Toggle ----
+        var hamburger = document.getElementById('hamburger-btn');
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebar-overlay');
+
+        hamburger.addEventListener('click', function () {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', function () {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+
+        // ---- Logout ----
+        document.getElementById('btn-logout').addEventListener('click', function (e) {
+            e.preventDefault();
+            apiLogout()
+                .then(function () { redirectToLogin(); })
+                .catch(function () { redirectToLogin(); });
+        });
+    })();
+    </script>
+</body>
+</html>

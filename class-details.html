@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جزئیات کلاس | سامانه ایلرن</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ---- Page Loader ---- */
+        #page-loader {
+            position: fixed; inset: 0;
+            background: var(--bg-body);
+            display: none; align-items: center; justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.4s ease;
+        }
+        #page-loader.active { display: flex; }
+
+        .loader-spinner {
+            width: 44px; height: 44px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        /* ---- Navbar ---- */
+        .navbar {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: var(--navbar-height);
+            z-index: 1030;
+            display: flex; align-items: center;
+            padding: 0 var(--space-5);
+            background: var(--bg-navbar);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .navbar-right,
+        .navbar-left { display: flex; align-items: center; gap: var(--space-3); }
+        .navbar-right { flex: 1; }
+
+        .navbar-logo {
+            font-weight: 800; font-size: var(--font-size-xl);
+            color: var(--color-primary);
+            margin-right: var(--space-3);
+        }
+
+        .hamburger {
+            display: none; background: none; border: none;
+            color: var(--text-secondary); font-size: 1.5rem;
+            cursor: pointer; padding: var(--space-1);
+            border-radius: var(--border-radius-sm);
+            transition: background var(--transition-fast);
+        }
+        .hamburger:hover { background: var(--bg-hover); }
+
+        .navbar-menu { display: flex; align-items: center; gap: var(--space-2); }
+
+        .nav-icon-btn {
+            position: relative;
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: var(--border-radius);
+            background: none; border: none;
+            color: var(--text-secondary); font-size: 1.25rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .nav-icon-btn:hover { background: var(--bg-hover); color: var(--color-primary); }
+
+        .nav-badge {
+            position: absolute; top: 2px; left: 2px;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            font-size: 0.65rem; font-weight: 700;
+            background: var(--color-danger); color: #fff;
+            border-radius: var(--border-radius-full);
+            display: none; align-items: center; justify-content: center;
+            line-height: 1;
+        }
+        .nav-badge.visible { display: flex; }
+
+        .user-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            color: #fff; font-weight: 700; font-size: var(--font-size-sm);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        #nav-username {
+            font-weight: 600; font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .btn-logout {
+            background: none; border: none;
+            color: var(--text-muted); font-size: 1.2rem;
+            cursor: pointer; padding: var(--space-1);
+            border-radius: var(--border-radius-sm);
+            transition: color var(--transition-fast);
+        }
+        .btn-logout:hover { color: var(--color-danger); }
+
+        /* ---- Notification Dropdown ---- */
+        .notification-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0;
+            width: 340px; max-height: 400px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow-y: auto;
+            opacity: 0; visibility: hidden;
+            transform: translateY(8px);
+            transition: all var(--transition-fast);
+            z-index: 1050;
+        }
+        .notification-dropdown.show {
+            opacity: 1; visibility: visible; transform: translateY(0);
+        }
+        .notif-header {
+            padding: var(--space-3) var(--space-4);
+            font-weight: 700; font-size: var(--font-size-sm);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .notif-item {
+            padding: var(--space-3) var(--space-4);
+            font-size: var(--font-size-sm);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            transition: background var(--transition-fast);
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: var(--bg-hover); }
+        .notif-empty {
+            padding: var(--space-6) var(--space-4);
+            text-align: center;
+            color: var(--text-muted); font-size: var(--font-size-sm);
+        }
+
+        /* ---- Sidebar ---- */
+        .sidebar {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: var(--sidebar-width);
+            z-index: 1040;
+            background: var(--bg-sidebar);
+            border-left: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            transition: transform var(--transition-base);
+        }
+
+        .sidebar-header {
+            display: flex; align-items: center;
+            height: var(--navbar-height);
+            padding: 0 var(--space-4);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sidebar-header .logo-text {
+            font-weight: 700; font-size: var(--font-size-lg);
+            color: var(--color-primary);
+        }
+
+        .sidebar-nav {
+            flex: 1; list-style: none;
+            padding: var(--space-3) 0;
+            overflow-y: auto;
+        }
+        .sidebar-nav li a {
+            display: flex; align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-2) var(--space-4);
+            margin: 2px var(--space-2);
+            border-radius: var(--border-radius);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm); font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        .sidebar-nav li a:hover { background: var(--bg-hover); color: var(--color-primary); }
+        .sidebar-nav li.active > a {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.30);
+        }
+        .sidebar-nav li a .icon { font-size: 1.25rem; flex-shrink: 0; width: 24px; text-align: center; }
+
+        .sidebar-term-box {
+            padding: var(--space-4);
+            margin: var(--space-3);
+            border-radius: var(--border-radius);
+            background: rgba(var(--color-primary-rgb), 0.05);
+            border: 1px solid rgba(var(--color-primary-rgb), 0.10);
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+        }
+        .sidebar-term-box .term-title {
+            font-weight: 700; font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+        .sidebar-term-box .term-row {
+            display: flex; justify-content: space-between;
+            padding: 2px 0;
+        }
+
+        /* ---- Main Content ---- */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            padding: var(--space-5);
+            padding-top: calc(var(--navbar-height) + var(--space-5));
+            min-height: 100vh;
+            transition: margin-right var(--transition-base);
+            animation: fadeIn 0.4s ease both;
+        }
+
+        /* ---- Sidebar Overlay ---- */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 1035;
+            transition: opacity var(--transition-base);
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* ---- Class Info Alert ---- */
+        .class-info-alert {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-4) var(--space-5);
+            margin-bottom: var(--space-5);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: var(--space-3);
+            animation: fadeInUp 0.45s ease both;
+        }
+        .class-info-alert .class-name {
+            font-size: var(--font-size-lg); font-weight: 800;
+            color: var(--text-primary); margin: 0;
+        }
+
+        /* ---- Recording Cards ---- */
+        .recording-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: var(--space-4);
+            transition: all var(--transition-fast);
+            animation: fadeInUp 0.35s ease both;
+        }
+        .recording-card:hover {
+            border-color: rgba(var(--color-primary-rgb), 0.3);
+            box-shadow: var(--shadow-sm);
+        }
+        .recording-info {
+            display: flex; align-items: center; gap: var(--space-4);
+            flex: 1; min-width: 0;
+        }
+        .recording-index {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(var(--color-primary-rgb), 0.10);
+            color: var(--color-primary);
+            font-weight: 700; font-size: var(--font-size-sm);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .recording-details { flex: 1; min-width: 0; }
+        .recording-name {
+            font-weight: 700; font-size: var(--font-size-base);
+            color: var(--text-primary); margin: 0 0 var(--space-1) 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .recording-meta {
+            display: flex; align-items: center; gap: var(--space-3);
+            font-size: var(--font-size-xs); color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+        .recording-meta span {
+            display: flex; align-items: center; gap: 4px;
+        }
+        .btn-play {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: var(--space-1);
+            padding: 0.5rem 1.2rem;
+            border: none; border-radius: var(--border-radius);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            color: #fff; font-weight: 600; font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+        .btn-play:hover {
+            box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-play .play-icon {
+            font-size: 1.1rem;
+        }
+
+        /* ---- Upload File Items ---- */
+        .upload-file-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            transition: all var(--transition-fast);
+            animation: fadeInUp 0.35s ease both;
+        }
+        .upload-file-item:hover {
+            border-color: rgba(var(--color-primary-rgb), 0.3);
+            box-shadow: var(--shadow-sm);
+        }
+        .upload-file-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: var(--space-3); margin-bottom: var(--space-2);
+        }
+        .upload-file-title {
+            font-weight: 700; font-size: var(--font-size-base);
+            color: var(--text-primary); margin: 0;
+        }
+        .upload-file-desc {
+            font-size: var(--font-size-sm); color: var(--text-secondary);
+            margin-bottom: var(--space-2); line-height: 1.6;
+        }
+        .upload-file-footer {
+            display: flex; align-items: center; flex-wrap: wrap;
+            gap: var(--space-3);
+            font-size: var(--font-size-xs); color: var(--text-muted);
+        }
+        .upload-file-footer span {
+            display: flex; align-items: center; gap: 4px;
+        }
+
+        /* ---- Link Items ---- */
+        .link-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            transition: all var(--transition-fast);
+            animation: fadeInUp 0.35s ease both;
+        }
+        .link-item:hover {
+            border-color: rgba(var(--color-primary-rgb), 0.3);
+            box-shadow: var(--shadow-sm);
+        }
+        .link-item-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: var(--space-3); margin-bottom: var(--space-2);
+        }
+        .link-item-title {
+            font-weight: 700; font-size: var(--font-size-base);
+            color: var(--text-primary); margin: 0;
+        }
+        .link-item-desc {
+            font-size: var(--font-size-sm); color: var(--text-secondary);
+            margin-bottom: var(--space-2); line-height: 1.6;
+        }
+        .link-item-url {
+            font-size: var(--font-size-xs); color: var(--color-primary);
+            word-break: break-all;
+        }
+
+        /* ---- Empty State ---- */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-8);
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: var(--space-3); }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 991.98px) {
+            .hamburger { display: flex; }
+            .sidebar { transform: translateX(100%); }
+            .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-xl); }
+            .main-content { margin-right: 0; }
+            .navbar { right: 0; }
+            #nav-username { display: none; }
+            .class-info-alert { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 575.98px) {
+            .notification-dropdown { width: calc(100vw - 2rem); left: auto; right: 0; }
+            .recording-card { flex-direction: column; align-items: flex-start; }
+            .recording-info { width: 100%; }
+            .btn-play { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div id="page-loader" class="active"><div class="loader-spinner"></div></div>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-right">
+            <button class="hamburger" id="hamburger-btn" aria-label="منو">☰</button>
+            <span class="navbar-logo">ایلرن</span>
+        </div>
+        <div class="navbar-menu">
+            <div style="position:relative">
+                <button class="nav-icon-btn" id="notif-btn" aria-label="اعلان‌ها">
+                    🔔
+                    <span class="nav-badge" id="notif-badge">0</span>
+                </button>
+                <div class="notification-dropdown" id="notif-dropdown">
+                    <div class="notif-header">اعلان‌ها</div>
+                    <div id="notif-list">
+                        <div class="notif-empty">اعلان جدیدی وجود ندارد</div>
+                    </div>
+                </div>
+            </div>
+            <a class="nav-icon-btn" href="chat.html" aria-label="پیام‌ها">
+                💬
+                <span class="nav-badge" id="msg-badge">0</span>
+            </a>
+            <div class="user-avatar" id="user-avatar"></div>
+            <span id="nav-username"></span>
+            <button class="btn-logout" id="btn-logout" aria-label="خروج" title="خروج">⏻</button>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo-text">ایلرن</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="dashboard.html">
+                    <span class="icon">📚</span>
+                    <span>درس‌های من</span>
+                </a>
+            </li>
+            <li>
+                <a href="meetings.html">
+                    <span class="icon">🎥</span>
+                    <span>جلسات من</span>
+                </a>
+            </li>
+            <li>
+                <a href="chat.html">
+                    <span class="icon">💬</span>
+                    <span>پیام‌ها</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-term-box">
+            <div class="term-title" id="term-name">—</div>
+            <div class="term-row"><span>شروع ترم:</span><span id="term-start">—</span></div>
+            <div class="term-row"><span>پایان ترم:</span><span id="term-end">—</span></div>
+            <div class="term-row"><span>شروع ثبت‌نام:</span><span id="reg-start">—</span></div>
+            <div class="term-row"><span>پایان ثبت‌نام:</span><span id="reg-end">—</span></div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <ul class="breadcrumb">
+            <li><a href="dashboard.html">خانه</a></li>
+            <li><a href="dashboard.html">درس‌های من</a></li>
+            <li id="breadcrumb-course">—</li>
+            <li class="current" aria-current="page">جزئیات کلاس</li>
+        </ul>
+
+        <!-- Class Info Alert -->
+        <div class="class-info-alert">
+            <h1 class="class-name" id="class-name">—</h1>
+            <a class="btn btn-accent btn-sm" id="btn-meeting-link" href="#" target="_blank" style="display:none">🎥 ورود به کلاس آنلاین</a>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" role="tablist">
+            <button class="tab-link active" data-tab="tab-recordings" role="tab" aria-selected="true">🎥 جلسات ضبط شده</button>
+            <button class="tab-link" data-tab="tab-uploads" role="tab" aria-selected="false">📁 فایل‌های آپلود شده</button>
+            <button class="tab-link" data-tab="tab-links" role="tab" aria-selected="false">🔗 لینک‌های آموزشی</button>
+        </div>
+
+        <!-- Tab 1: Recorded Sessions -->
+        <div class="tab-content" id="tab-recordings" role="tabpanel">
+            <div id="recordings-list"></div>
+        </div>
+
+        <!-- Tab 2: Uploaded Files -->
+        <div class="tab-content" id="tab-uploads" role="tabpanel" style="display:none">
+            <div id="uploads-list"></div>
+        </div>
+
+        <!-- Tab 3: Educational Links -->
+        <div class="tab-content" id="tab-links" role="tabpanel" style="display:none">
+            <div id="links-list"></div>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/mock.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+    (function () {
+        // ---- Auth & Init ----
+        checkAuth();
+
+        var TCInfoID = getQueryParam('id');
+        if (!TCInfoID) {
+            showToast('شناسه کلاس یافت نشد', 'error');
+            setTimeout(function () { window.location.href = 'dashboard.html'; }, 1500);
+            return;
+        }
+        localStorage.setItem('TeCoInId', TCInfoID);
+
+        apiSetTime().catch(function (err) {
+            console.warn('Time sync failed:', err);
+        });
+
+        loadNotifications();
+        loadRecordings();
+
+        window.addEventListener('load', function () { hideLoading(); });
+
+        // ---- State ----
+        var tabsLoaded = { recordings: true, uploads: false, links: false };
+
+        // ---- Notifications ----
+        function loadNotifications() {
+            apiGetNotifications()
+                .then(function (data) {
+                    if (!data) return;
+
+                    var notifications = [];
+                    try {
+                        notifications = typeof data.Item1 === 'string' ? JSON.parse(data.Item1) : (data.Item1 || []);
+                    } catch (e) { notifications = []; }
+                    if (!Array.isArray(notifications)) notifications = [];
+
+                    var notifCount = parseInt(data.Item2, 10) || 0;
+
+                    var badge = document.getElementById('notif-badge');
+                    if (notifCount > 0) {
+                        badge.textContent = notifCount;
+                        badge.classList.add('visible');
+                    }
+
+                    var listEl = document.getElementById('notif-list');
+                    if (notifications.length === 0) {
+                        listEl.innerHTML = '<div class="notif-empty">اعلان جدیدی وجود ندارد</div>';
+                    } else {
+                        var nhtml = '';
+                        notifications.forEach(function (n) {
+                            nhtml += '<div class="notif-item">' + escapeHtml(n.title || n.text || String(n)) + '</div>';
+                        });
+                        listEl.innerHTML = nhtml;
+                    }
+
+                    // Term info
+                    var termInfo = null;
+                    try {
+                        termInfo = typeof data.Item3 === 'string' ? JSON.parse(data.Item3) : data.Item3;
+                    } catch (e) { termInfo = null; }
+
+                    if (termInfo) {
+                        var tn = document.getElementById('term-name');
+                        var ts = document.getElementById('term-start');
+                        var te = document.getElementById('term-end');
+                        var rs = document.getElementById('reg-start');
+                        var re = document.getElementById('reg-end');
+                        if (tn) tn.textContent = termInfo.TermName || '—';
+                        if (ts) ts.textContent = pdate(termInfo.TermStart) || '—';
+                        if (te) te.textContent = pdate(termInfo.TermEnd) || '—';
+                        if (rs) rs.textContent = pdate(termInfo.reregsdate) || '—';
+                        if (re) re.textContent = pdate(termInfo.reregedate) || '—';
+                    }
+
+                    // Username
+                    var username = data.Item4 || getUserName();
+                    if (username) {
+                        var unEl = document.getElementById('nav-username');
+                        if (unEl) unEl.textContent = username;
+                        localStorage.setItem('username', username);
+                        var avEl = document.getElementById('user-avatar');
+                        if (avEl) avEl.textContent = username.charAt(0).toUpperCase();
+                    }
+
+                    // Class name (Item5 = class display name from notification endpoint)
+                    var className = data.Item5 || localStorage.getItem('className') || '';
+                    if (className) {
+                        document.getElementById('class-name').textContent = className;
+                        document.getElementById('breadcrumb-course').textContent = className;
+                        document.title = className + ' - جزئیات کلاس | سامانه ایلرن';
+                    }
+                })
+                .catch(function (err) {
+                    console.warn('Failed to load notifications:', err);
+                    var storedName = getUserName();
+                    if (storedName) {
+                        var unEl = document.getElementById('nav-username');
+                        if (unEl) unEl.textContent = storedName;
+                        var avEl = document.getElementById('user-avatar');
+                        if (avEl) avEl.textContent = storedName.charAt(0).toUpperCase();
+                    }
+                });
+        }
+
+        // ---- Recordings ----
+        function loadRecordings() {
+            showLoading();
+            apiGetRecordList()
+                .then(function (data) {
+                    var records = [];
+                    try {
+                        records = typeof data === 'string' ? JSON.parse(data) : data;
+                    } catch (e) { records = []; }
+                    if (!Array.isArray(records)) records = [];
+                    renderRecordings(records);
+                })
+                .catch(function () {
+                    document.getElementById('recordings-list').innerHTML =
+                        '<div class="empty-state"><div class="empty-icon">⚠️</div><p>خطا در بارگذاری جلسات ضبط شده</p></div>';
+                })
+                .finally(function () { hideLoading(); });
+        }
+
+        function calcDuration(startStr, endStr) {
+            if (!startStr || !endStr) return '—';
+            try {
+                var start = new Date(startStr);
+                var end = new Date(endStr);
+                if (isNaN(start.getTime()) || isNaN(end.getTime())) return '—';
+                var diffMs = Math.abs(end - start);
+                var mins = Math.floor(diffMs / 60000);
+                var hours = Math.floor(mins / 60);
+                var remainMins = mins % 60;
+                if (hours > 0) {
+                    return hours + ' ساعت و ' + remainMins + ' دقیقه';
+                }
+                return mins + ' دقیقه';
+            } catch (e) {
+                return '—';
+            }
+        }
+
+        function renderRecordings(records) {
+            var container = document.getElementById('recordings-list');
+            if (records.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">🎥</div><p>جلسه ضبط شده‌ای وجود ندارد</p></div>';
+                return;
+            }
+
+            var html = '';
+            records.forEach(function (r, i) {
+                var name = escapeHtml(r.name || r.Name || r.RecordName || 'جلسه ' + (i + 1));
+                var dateStart = r.datestart || r.DateStart || r.StartDate || '';
+                var dateEnd = r.dateend || r.DateEnd || r.EndDate || '';
+                var url = r.url || r.Url || r.URL || r.RecordUrl || '#';
+                var duration = calcDuration(dateStart, dateEnd);
+                var dateDisplay = pdatefull(dateStart) || pdate(dateStart) || '—';
+                var delay = (i * 0.05) + 's';
+
+                html += '<div class="recording-card" style="animation-delay:' + delay + '">';
+                html += '<div class="recording-info">';
+                html += '<div class="recording-index">' + (i + 1) + '</div>';
+                html += '<div class="recording-details">';
+                html += '<h3 class="recording-name">' + name + '</h3>';
+                html += '<div class="recording-meta">';
+                html += '<span>📅 ' + dateDisplay + '</span>';
+                html += '<span>⏱ ' + escapeHtml(duration) + '</span>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+                if (url && url !== '#') {
+                    html += '<a class="btn-play" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">';
+                    html += '<span class="play-icon">▶</span> پخش';
+                    html += '</a>';
+                }
+                html += '</div>';
+            });
+            container.innerHTML = html;
+        }
+
+        // ---- Uploaded Files ----
+        function loadUploads() {
+            showLoading();
+            apiGetUploadList(1)
+                .then(function (data) {
+                    var files = [];
+                    try {
+                        files = typeof data === 'string' ? JSON.parse(data) : data;
+                    } catch (e) { files = []; }
+                    if (!Array.isArray(files)) files = [];
+                    renderUploads(files);
+                })
+                .catch(function () {
+                    document.getElementById('uploads-list').innerHTML =
+                        '<div class="empty-state"><div class="empty-icon">⚠️</div><p>خطا در بارگذاری فایل‌ها</p></div>';
+                })
+                .finally(function () { hideLoading(); });
+        }
+
+        function renderUploads(files) {
+            var container = document.getElementById('uploads-list');
+            if (files.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div><p>فایلی آپلود نشده است</p></div>';
+                return;
+            }
+
+            var html = '';
+            files.forEach(function (f, i) {
+                var name = escapeHtml(f.FileName || f.filename || f.Name || f.name || 'فایل');
+                var size = f.FileSize || f.filesize || f.Size || 0;
+                var desc = escapeHtml(f.Description || f.description || f.Desc || f.desc || '');
+                var date = f.UploadDate || f.uploaddate || f.Date || f.date || f.CreateDate || '';
+                var downloadUrl = f.FilePath || f.filepath || f.Url || f.url || '';
+                var delay = (i * 0.05) + 's';
+
+                html += '<div class="upload-file-item" style="animation-delay:' + delay + '">';
+                html += '<div class="upload-file-header">';
+                html += '<h3 class="upload-file-title">📄 ' + name + '</h3>';
+                if (downloadUrl) {
+                    html += '<a class="btn btn-sm btn-primary" href="' + escapeHtml(downloadUrl) + '" target="_blank" rel="noopener">📥 دانلود</a>';
+                }
+                html += '</div>';
+                if (desc) {
+                    html += '<div class="upload-file-desc">' + desc + '</div>';
+                }
+                html += '<div class="upload-file-footer">';
+                if (size) {
+                    html += '<span>💾 ' + getFileSize(parseInt(size, 10)) + '</span>';
+                }
+                if (date) {
+                    html += '<span>📅 ' + pdatefull(date) + '</span>';
+                }
+                html += '</div>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
+        }
+
+        // ---- Educational Links ----
+        function loadLinks() {
+            showLoading();
+            apiGetUploadList(2)
+                .then(function (data) {
+                    var links = [];
+                    try {
+                        links = typeof data === 'string' ? JSON.parse(data) : data;
+                    } catch (e) { links = []; }
+                    if (!Array.isArray(links)) links = [];
+                    renderLinks(links);
+                })
+                .catch(function () {
+                    document.getElementById('links-list').innerHTML =
+                        '<div class="empty-state"><div class="empty-icon">⚠️</div><p>خطا در بارگذاری لینک‌ها</p></div>';
+                })
+                .finally(function () { hideLoading(); });
+        }
+
+        function renderLinks(links) {
+            var container = document.getElementById('links-list');
+            if (links.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔗</div><p>لینک آموزشی ثبت نشده است</p></div>';
+                return;
+            }
+
+            var html = '';
+            links.forEach(function (l, i) {
+                var title = escapeHtml(l.Title || l.title || l.Name || l.name || 'لینک');
+                var url = l.Link || l.link || l.Url || l.url || '#';
+                var desc = escapeHtml(l.Description || l.description || l.Desc || l.desc || '');
+                var delay = (i * 0.05) + 's';
+
+                html += '<div class="link-item" style="animation-delay:' + delay + '">';
+                html += '<div class="link-item-header">';
+                html += '<h3 class="link-item-title">🔗 ' + title + '</h3>';
+                if (url && url !== '#') {
+                    html += '<a class="btn btn-sm btn-primary" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">🌐 مشاهده</a>';
+                }
+                html += '</div>';
+                if (desc) {
+                    html += '<div class="link-item-desc">' + desc + '</div>';
+                }
+                if (url && url !== '#') {
+                    html += '<div class="link-item-url">' + escapeHtml(url) + '</div>';
+                }
+                html += '</div>';
+            });
+            container.innerHTML = html;
+        }
+
+        // ---- Tab Switching ----
+        var tabBtns = document.querySelectorAll('.tab-link[data-tab]');
+        var tabPanels = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var targetId = this.getAttribute('data-tab');
+
+                // Update active tab button
+                tabBtns.forEach(function (b) {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+
+                // Show target panel, hide others
+                tabPanels.forEach(function (p) { p.style.display = 'none'; });
+                var target = document.getElementById(targetId);
+                if (target) target.style.display = '';
+
+                // Lazy-load tab content
+                if (targetId === 'tab-uploads' && !tabsLoaded.uploads) {
+                    tabsLoaded.uploads = true;
+                    loadUploads();
+                } else if (targetId === 'tab-links' && !tabsLoaded.links) {
+                    tabsLoaded.links = true;
+                    loadLinks();
+                }
+            });
+        });
+
+        // ---- Notification Dropdown Toggle ----
+        var notifBtn = document.getElementById('notif-btn');
+        var notifDropdown = document.getElementById('notif-dropdown');
+
+        notifBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!notifDropdown.contains(e.target) && e.target !== notifBtn) {
+                notifDropdown.classList.remove('show');
+            }
+        });
+
+        // ---- Sidebar Toggle ----
+        var hamburger = document.getElementById('hamburger-btn');
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebar-overlay');
+
+        hamburger.addEventListener('click', function () {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', function () {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+
+        // ---- Logout ----
+        document.getElementById('btn-logout').addEventListener('click', function (e) {
+            e.preventDefault();
+            apiLogout()
+                .then(function () { redirectToLogin(); })
+                .catch(function () { redirectToLogin(); });
+        });
+    })();
+    </script>
+</body>
+</html>
