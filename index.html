@@ -375,10 +375,12 @@
                     var proxyUrl = proxyInput ? proxyInput.value.trim() : '';
                     if (proxyUrl) {
                         if (localStorage.elearn_proxy_url != '') {
+                            localStorage.setItem('elearn_proxy_url', proxyUrl);
                             showToast('پروکسی به صورت پیشفرض قرار داده شده است. شما در حال ویرایش و قرار دادن پروکسی جدید هستید', 'info');
+                        } else {
+                            localStorage.setItem('elearn_proxy_url', proxyUrl);
+                            showToast('آدرس پروکسی ذخیره شد.', 'success');
                         }
-                        localStorage.setItem('elearn_proxy_url', proxyUrl);
-                        showToast('آدرس پروکسی ذخیره شد.', 'success');
                     } else {
                         localStorage.removeItem('elearn_proxy_url');
                         showToast('آدرس پروکسی حذف شد.', 'info');
