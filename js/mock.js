@@ -245,8 +245,12 @@
         'POST:UploadHandler.ashx': function () { return 'ok'; },
 
         // Class Details
-        'GET:STClassDetails.aspx/recordlist': function () { return JSON.stringify([]); },
-        'GET:STClassDetails.aspx/Uploadlist': function () { return JSON.stringify([]); },
+        'GET:STClassDetails.aspx/recordlist': function (d) {
+            return { sEcho: d.sEcho || '1', iTotalRecords: 0, iTotalDisplayRecords: 0, aaData: [] };
+        },
+        'GET:STClassDetails.aspx/Uploadlist': function (d) {
+            return { sEcho: d.sEcho || '1', iTotalRecords: 0, iTotalDisplayRecords: 0, aaData: [] };
+        },
         'POST:STClassDetails.aspx/creatmeeting': function () { return 'ok'; },
         'POST:STClassDetails.aspx/getuser': function (d) {
             return JSON.stringify({ username: d.user || '', fullname: 'کاربر نمونه' });
@@ -258,8 +262,8 @@
         'POST:STClassDetails.aspx/savelink': function () { return 'ok'; },
 
         // Meetings
-        'GET:STMeetingList.aspx/GetMeetingList': function () {
-            return JSON.stringify(MEETINGS);
+        'GET:STMeetingList.aspx/GetMeetingList': function (d) {
+            return { sEcho: d.sEcho || '1', iTotalRecords: MEETINGS.length, iTotalDisplayRecords: MEETINGS.length, aaData: MEETINGS };
         },
 
         // Chat

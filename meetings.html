@@ -627,7 +627,13 @@
         });
 
         loadNotifications();
-        loadMeetings();
+
+        // Prime the server-side session before calling meeting list API
+        apiInitMeetingContext().then(function () {
+            loadMeetings();
+        }).catch(function () {
+            loadMeetings();
+        });
 
         window.addEventListener('load', function () {
             hideLoading();

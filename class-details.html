@@ -515,19 +515,29 @@
         checkAuth();
 
         var TCInfoID = getQueryParam('id');
+        var CLid = getQueryParam('clid');
         if (!TCInfoID) {
             showToast('شناسه کلاس یافت نشد', 'error');
             setTimeout(function () { window.location.href = 'dashboard.html'; }, 1500);
             return;
         }
         localStorage.setItem('TeCoInId', TCInfoID);
+        if (CLid) {
+            localStorage.setItem('TeCoInClid', CLid);
+        }
 
         apiSetTime().catch(function (err) {
             console.warn('Time sync failed:', err);
         });
 
         loadNotifications();
-        loadRecordings();
+
+        // Prime the server-side session with the class context before AJAX calls
+        apiInitClassDetailContext(CLid || localStorage.getItem('TeCoInClid') || TCInfoID).then(function () {
+            loadRecordings();
+        }).catch(function () {
+            loadRecordings();
+        });
 
         window.addEventListener('load', function () { hideLoading(); });
 
@@ -621,7 +631,12 @@
                 .then(function (data) {
                     var records = [];
                     try {
-                        records = typeof data === 'string' ? JSON.parse(data) : data;
+                        var parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                        if (parsed && parsed.aaData) {
+                            records = parsed.aaData;
+                        } else if (Array.isArray(parsed)) {
+                            records = parsed;
+                        }
                     } catch (e) { records = []; }
                     if (!Array.isArray(records)) records = [];
                     renderRecordings(records);
@@ -697,7 +712,12 @@
                 .then(function (data) {
                     var files = [];
                     try {
-                        files = typeof data === 'string' ? JSON.parse(data) : data;
+                        var parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                        if (parsed && parsed.aaData) {
+                            files = parsed.aaData;
+                        } else if (Array.isArray(parsed)) {
+                            files = parsed;
+                        }
                     } catch (e) { files = []; }
                     if (!Array.isArray(files)) files = [];
                     renderUploads(files);
@@ -755,7 +775,12 @@
                 .then(function (data) {
                     var links = [];
                     try {
-                        links = typeof data === 'string' ? JSON.parse(data) : data;
+                        var parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                        if (parsed && parsed.aaData) {
+                            links = parsed.aaData;
+                        } else if (Array.isArray(parsed)) {
+                            links = parsed;
+                        }
                     } catch (e) { links = []; }
                     if (!Array.isArray(links)) links = [];
                     renderLinks(links);

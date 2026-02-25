@@ -774,9 +774,13 @@
             if (footer) footer.style.display = '';
         }
 
-        // Check chat access
-        apiChatGetInfo()
-            .then(function (data) {
+        // Prime the server-side session for chat, then check access
+        apiInitChatContext().then(function () {
+            return apiChatGetInfo();
+        }).catch(function () {
+            // Even if priming fails, try GetInfo in case it works
+            return apiChatGetInfo();
+        }).then(function (data) {
                 if (data && typeof data === 'string' && data.indexOf('noaccess') !== -1) {
                     showToast('شما دسترسی به بخش پیام‌ها ندارید', 'error');
                     return;

@@ -219,6 +219,73 @@ function apiInitCourseContext(clid) {
     return Promise.race([fetchPromise, timeoutPromise]);
 }
 
+/**
+ * Prime the server-side ASP.NET session for STClassDetails.aspx.
+ *
+ * Same principle as apiInitCourseContext – the backend stores the active
+ * class in its session when the page is first loaded with CLid/TeCoInD.
+ *
+ * @param {string} clid - The CLid/TeCoInD identifier for the class
+ * @returns {Promise<void>}
+ */
+function apiInitClassDetailContext(clid) {
+    if (!clid || localStorage.getItem('elearn_mode') !== 'real') {
+        return Promise.resolve();
+    }
+    var fetchPromise = fetch(getApiBase() + 'STClassDetails.aspx?CLid=' + encodeURIComponent(clid), {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include'
+    }).then(
+        function () {},
+        function (err) { console.warn('[elearn] ClassDetail context init failed:', err); }
+    );
+    var timeoutPromise = new Promise(function (resolve) { setTimeout(resolve, COURSE_CONTEXT_TIMEOUT_MS); });
+    return Promise.race([fetchPromise, timeoutPromise]);
+}
+
+/**
+ * Prime the server-side ASP.NET session for STMeetingList.aspx.
+ *
+ * @returns {Promise<void>}
+ */
+function apiInitMeetingContext() {
+    if (localStorage.getItem('elearn_mode') !== 'real') {
+        return Promise.resolve();
+    }
+    var fetchPromise = fetch(getApiBase() + 'STMeetingList.aspx', {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include'
+    }).then(
+        function () {},
+        function (err) { console.warn('[elearn] Meeting context init failed:', err); }
+    );
+    var timeoutPromise = new Promise(function (resolve) { setTimeout(resolve, COURSE_CONTEXT_TIMEOUT_MS); });
+    return Promise.race([fetchPromise, timeoutPromise]);
+}
+
+/**
+ * Prime the server-side ASP.NET session for chat.aspx.
+ *
+ * @returns {Promise<void>}
+ */
+function apiInitChatContext() {
+    if (localStorage.getItem('elearn_mode') !== 'real') {
+        return Promise.resolve();
+    }
+    var fetchPromise = fetch(getApiBase() + 'chat.aspx', {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include'
+    }).then(
+        function () {},
+        function (err) { console.warn('[elearn] Chat context init failed:', err); }
+    );
+    var timeoutPromise = new Promise(function (resolve) { setTimeout(resolve, COURSE_CONTEXT_TIMEOUT_MS); });
+    return Promise.race([fetchPromise, timeoutPromise]);
+}
+
 /** Get the online class link for a given class GUID */
 function apiGetClassLink(tcguid) {
     return apiPost('STClasslist.aspx/GetClassLink', { tcguid: tcguid });
@@ -397,12 +464,47 @@ function apiUploadAnswerFile(file, guid) {
 
 /** Get record list (DataTable format) */
 function apiGetRecordList() {
-    return apiGet('STClassDetails.aspx/recordlist');
+    return apiGet('STClassDetails.aspx/recordlist', {
+        sEcho: '1',
+        iColumns: '5',
+        sColumns: ',,,,',
+        iDisplayStart: '0',
+        iDisplayLength: '-1',
+        mDataProp_0: '0',
+        sSearch_0: '', bRegex_0: 'false', bSearchable_0: 'true', bSortable_0: 'false',
+        mDataProp_1: 'function',
+        sSearch_1: '', bRegex_1: 'false', bSearchable_1: 'true', bSortable_1: 'true',
+        mDataProp_2: '2',
+        sSearch_2: '', bRegex_2: 'false', bSearchable_2: 'true', bSortable_2: 'true',
+        mDataProp_3: '3',
+        sSearch_3: '', bRegex_3: 'false', bSearchable_3: 'true', bSortable_3: 'false',
+        mDataProp_4: '4',
+        sSearch_4: '', bRegex_4: 'false', bSearchable_4: 'true', bSortable_4: 'false',
+        sSearch: '', bRegex: 'false',
+        iSortCol_0: '2', sSortDir_0: 'desc', iSortingCols: '1'
+    });
 }
 
 /** Get upload list filtered by type */
 function apiGetUploadList(type) {
-    return apiGet('STClassDetails.aspx/Uploadlist', { type: type });
+    return apiGet('STClassDetails.aspx/Uploadlist', {
+        type: String(type),
+        sEcho: '1',
+        iColumns: '4',
+        sColumns: ',,,',
+        iDisplayStart: '0',
+        iDisplayLength: '-1',
+        mDataProp_0: '0',
+        sSearch_0: '', bRegex_0: 'false', bSearchable_0: 'true', bSortable_0: 'false',
+        mDataProp_1: 'function',
+        sSearch_1: '', bRegex_1: 'false', bSearchable_1: 'true', bSortable_1: 'true',
+        mDataProp_2: '2',
+        sSearch_2: '', bRegex_2: 'false', bSearchable_2: 'true', bSortable_2: 'true',
+        mDataProp_3: '3',
+        sSearch_3: '', bRegex_3: 'false', bSearchable_3: 'true', bSortable_3: 'false',
+        sSearch: '', bRegex: 'false',
+        iSortCol_0: '2', sSortDir_0: 'desc', iSortingCols: '1'
+    });
 }
 
 /** Create a new meeting */
@@ -521,8 +623,23 @@ function apiAdminReturn() {
 /** Get meeting list for the student */
 function apiGetMeetingList(iParticipant, iDisplayStart, iDisplayLength) {
     return apiGet('STMeetingList.aspx/GetMeetingList', {
-        iParticipant: iParticipant || '1',
+        sEcho: '1',
+        iColumns: '5',
+        sColumns: ',,,,',
         iDisplayStart: iDisplayStart || '0',
-        iDisplayLength: iDisplayLength || '-1'
+        iDisplayLength: iDisplayLength || '-1',
+        mDataProp_0: '0',
+        sSearch_0: '', bRegex_0: 'false', bSearchable_0: 'true', bSortable_0: 'false',
+        mDataProp_1: 'function',
+        sSearch_1: '', bRegex_1: 'false', bSearchable_1: 'true', bSortable_1: 'true',
+        mDataProp_2: '2',
+        sSearch_2: '', bRegex_2: 'false', bSearchable_2: 'true', bSortable_2: 'true',
+        mDataProp_3: '3',
+        sSearch_3: '', bRegex_3: 'false', bSearchable_3: 'true', bSortable_3: 'false',
+        mDataProp_4: '4',
+        sSearch_4: '', bRegex_4: 'false', bSearchable_4: 'true', bSortable_4: 'false',
+        sSearch: '', bRegex: 'false',
+        iSortCol_0: '2', sSortDir_0: 'desc', iSortingCols: '1',
+        iParticipant: iParticipant || '1'
     });
 }
