@@ -233,11 +233,12 @@ function apiInitCourseContext(clid) {
         return Promise.resolve();
     }
     // Set the page referer for all subsequent STCoursepage calls
-    setPageReferer('STCoursepage.aspx?CLid=' + clid);
+    var encodedClid = encodeURIComponent(clid);
+    setPageReferer('STCoursepage.aspx?CLid=' + encodedClid);
     var primingHeaders = {
-        'X-ELearn-Referer': 'STCoursepage.aspx?CLid=' + clid
+        'X-ELearn-Referer': 'STCoursepage.aspx?CLid=' + encodedClid
     };
-    var fetchPromise = fetch(getApiBase() + 'STCoursepage.aspx?CLid=' + encodeURIComponent(clid), {
+    var fetchPromise = fetch(getApiBase() + 'STCoursepage.aspx?CLid=' + encodedClid, {
         method: 'GET',
         headers: primingHeaders,
         mode: 'cors',
@@ -264,11 +265,12 @@ function apiInitClassDetailContext(clid) {
     if (!clid || localStorage.getItem('elearn_mode') !== 'real') {
         return Promise.resolve();
     }
-    setPageReferer('STClassDetails.aspx?CLid=' + clid);
+    var encodedClid = encodeURIComponent(clid);
+    setPageReferer('STClassDetails.aspx?CLid=' + encodedClid);
     var primingHeaders = {
-        'X-ELearn-Referer': 'STClassDetails.aspx?CLid=' + clid
+        'X-ELearn-Referer': 'STClassDetails.aspx?CLid=' + encodedClid
     };
-    var fetchPromise = fetch(getApiBase() + 'STClassDetails.aspx?CLid=' + encodeURIComponent(clid), {
+    var fetchPromise = fetch(getApiBase() + 'STClassDetails.aspx?CLid=' + encodedClid, {
         method: 'GET',
         headers: primingHeaders,
         mode: 'cors',
