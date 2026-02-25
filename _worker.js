@@ -63,6 +63,14 @@ export default {
         // Set Origin to the real server (ASP.NET may validate this)
         forwardHeaders.set('Origin', TARGET);
 
+        // Remove browser fetch-metadata headers from the original cross-site
+        // request. Forwarding values like `Sec-Fetch-Site: cross-site` can
+        // trigger stricter anti-CSRF checks on the upstream ASP.NET app.
+        forwardHeaders.delete('Sec-Fetch-Site');
+        forwardHeaders.delete('Sec-Fetch-Mode');
+        forwardHeaders.delete('Sec-Fetch-Dest');
+        forwardHeaders.delete('Sec-Fetch-User');
+
         // Rewrite Referer: the browser sends our GitHub Pages / proxy URL,
         // but ASP.NET Page Methods expect the Referer to be from the same
         // domain. If the frontend passed X-ELearn-Referer, use that as
@@ -70,7 +78,10 @@ export default {
         var customReferer = forwardHeaders.get('X-ELearn-Referer');
         forwardHeaders.delete('X-ELearn-Referer');
         if (customReferer) {
-            forwardHeaders.set('Referer', TARGET + '/' + customReferer.replace(/^\//, ''));
+            // Build the Referer via URL parsing so query values are preserved
+            // correctly (e.g. CLid with + or / characters).
+            var refererUrl = new URL(customReferer.replace(/^\//, ''), TARGET + '/');
+            forwardHeaders.set('Referer', refererUrl.toString());
         } else {
             var aspxMatch = url.pathname.match(/^(\/[^/]*\.aspx)/i);
             if (aspxMatch) {
