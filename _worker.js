@@ -190,9 +190,9 @@ function normaliseAspNetRedirect(fromUrl, location) {
     }
 
     // Known ASP.NET PageMethod behavior: Location: Index.aspx
-    // (or ./Index.aspx) should map to site root, not /SomePage.aspx/Index.aspx
-    if (/^(?:\.\/)?[^/?#]+\.aspx(?:[?#].*)?$/i.test(location)) {
-        return TARGET + '/' + location.replace(/^\.\//, '');
+    // should map to site root, not /SomePage.aspx/Index.aspx
+    if (/^[^/?#]+\.aspx(?:[?#].*)?$/i.test(location)) {
+        return TARGET + '/' + location;
     }
 
     return new URL(location, fromUrl).toString();
