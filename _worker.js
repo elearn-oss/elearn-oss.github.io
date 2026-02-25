@@ -80,18 +80,15 @@ export default {
             }
         }
 
-        const proxyRequest = new Request(targetUrl, {
-            method: request.method,
-            headers: forwardHeaders,
-            body: (request.method !== 'GET' && request.method !== 'HEAD')
-                ? request.body
-                : undefined,
-            redirect: 'follow',
-        });
-
         let response;
         try {
-            response = await fetch(proxyRequest);
+            response = await fetchWithAspNetRedirectFix(targetUrl, {
+                method: request.method,
+                headers: forwardHeaders,
+                body: (request.method !== 'GET' && request.method !== 'HEAD')
+                    ? request.body
+                    : undefined,
+            });
         } catch (err) {
             return new Response('Proxy error: ' + err.message, { status: 502 });
         }
@@ -125,3 +122,67 @@ export default {
         });
     },
 };
+
+/**
+ * Some ASP.NET PageMethods return redirects like `Location: Index.aspx`.
+ * If followed relative to `/STCoursepage.aspx/GetInfo`, the URL becomes
+ * `/STCoursepage.aspx/Index.aspx` and can loop forever. We follow redirects
+ * manually and normalize these known malformed relative redirects.
+ */
+async function fetchWithAspNetRedirectFix(initialUrl, init) {
+    let currentUrl = initialUrl;
+    let method = init.method || 'GET';
+    let body = init.body;
+    const visited = new Set();
+
+    for (let i = 0; i < 10; i++) {
+        if (visited.has(currentUrl)) {
+            throw new Error('Too many redirects (loop detected): ' + currentUrl);
+        }
+        visited.add(currentUrl);
+
+        const response = await fetch(new Request(currentUrl, {
+            method: method,
+            headers: init.headers,
+            body: (method !== 'GET' && method !== 'HEAD') ? body : undefined,
+            redirect: 'manual',
+        }));
+
+        if (response.status < 300 || response.status > 399) {
+            return response;
+        }
+
+        const location = response.headers.get('Location');
+        if (!location) {
+            return response;
+        }
+
+        currentUrl = normaliseAspNetRedirect(currentUrl, location);
+
+        // RFC behavior for 302/303 after non-GET: switch to GET with no body.
+        if (response.status === 303 || ((response.status === 301 || response.status === 302) && method !== 'GET' && method !== 'HEAD')) {
+            method = 'GET';
+            body = undefined;
+        }
+    }
+
+    throw new Error('Too many redirects.');
+}
+
+function normaliseAspNetRedirect(fromUrl, location) {
+    if (/^https?:\/\//i.test(location)) {
+        return location;
+    }
+
+    if (location.startsWith('/')) {
+        return TARGET + location;
+    }
+
+    // Known ASP.NET PageMethod behavior: Location: Index.aspx
+    // should map to site root, not /SomePage.aspx/Index.aspx
+    if (/^[^/?#]+\.aspx(?:[?#].*)?$/i.test(location)) {
+        return TARGET + '/' + location;
+    }
+
+    return new URL(location, fromUrl).toString();
+}
