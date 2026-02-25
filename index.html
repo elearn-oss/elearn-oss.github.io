@@ -417,6 +417,7 @@
                     return;
                 }
 
+                console.log('[doLogin] Attempting login with mode:', getCurrentMode());
                 apiLogin(username, password, '0').then(function (result) {
                     if (result.Item1 === 'ok') {
                         localStorage.setItem('utype', result.Item2);

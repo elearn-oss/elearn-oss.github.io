@@ -14,12 +14,18 @@
 var API_BASE = 'https://elearn.uk.ac.ir/';
 
 /**
- * Initialize default proxy URL if not already set.
- * This ensures CORS requests work in real mode from the first page load.
+ * Initialize default mode and proxy URL if not already set.
+ * This must happen BEFORE mock.js loads so it can check the mode correctly.
  */
+if (!localStorage.getItem('elearn_mode')) {
+    localStorage.setItem('elearn_mode', 'real');
+    console.log('[api.js] Set mode to "real"');
+}
 if (!localStorage.getItem('elearn_proxy_url')) {
     localStorage.setItem('elearn_proxy_url', 'https://elearn-cors-proxy.elearn-oss.workers.dev');
+    console.log('[api.js] Set default proxy URL');
 }
+console.log('[api.js] Mode:', localStorage.getItem('elearn_mode'), 'Proxy:', localStorage.getItem('elearn_proxy_url'));
 
 /**
  * Maximum time (ms) to wait for the course-context priming GET before
@@ -61,7 +67,9 @@ function apiPost(url, data) {
     // credentials: 'include' is required so the browser sends and stores the
     // ASP.NET session cookie for the CORS proxy domain. The Cloudflare Worker
     // must respond with Access-Control-Allow-Credentials: true for this to work.
-    return fetch(getApiBase() + url, {
+    var fullUrl = getApiBase() + url;
+    console.log('[apiPost] Requesting:', fullUrl);
+    return fetch(fullUrl, {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/javascript, */*; q=0.01',

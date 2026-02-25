@@ -19,10 +19,14 @@
     'use strict';
 
     // ── Real-API mode: skip all overrides ────────────────────
-    if (localStorage.getItem('elearn_mode') === 'real') {
+    var mode = localStorage.getItem('elearn_mode');
+    console.log('[mock.js] Checking mode:', mode);
+    if (mode === 'real') {
         console.info('[elearn] حالت اتصال به سایت دانشگاه فعال است.');
+        console.log('[mock.js] Real mode detected, exiting without overrides');
         return;
     }
+    console.log('[mock.js] Demo mode detected, applying mock overrides');
 
     // ── Helpers ──────────────────────────────────────────────
     function uid() {
