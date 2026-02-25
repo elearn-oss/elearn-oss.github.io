@@ -34,6 +34,23 @@ console.log('[api.js] Mode:', localStorage.getItem('elearn_mode'), 'Proxy:', loc
 var COURSE_CONTEXT_TIMEOUT_MS = 10000;
 
 /**
+ * Stores the Referer path that the CORS proxy should send to the real
+ * server. For example 'STCoursepage.aspx?CLid=abc' means the proxy
+ * sets Referer: https://elearn.uk.ac.ir/STCoursepage.aspx?CLid=abc.
+ *
+ * This is necessary because the browser's automatic Referer points to
+ * our GitHub Pages origin, but ASP.NET Page Methods validate that the
+ * Referer comes from the same domain.
+ */
+var _currentPageReferer = '';
+
+/** Set the page referer path for subsequent API calls. */
+function setPageReferer(path) {
+    _currentPageReferer = path || '';
+    console.log('[api.js] Page referer set to:', _currentPageReferer);
+}
+
+/**
  * Returns the effective API base URL.
  *
  * When a CORS proxy URL is stored in localStorage under 'elearn_proxy_url',
@@ -69,13 +86,18 @@ function apiPost(url, data) {
     // must respond with Access-Control-Allow-Credentials: true for this to work.
     var fullUrl = getApiBase() + url;
     console.log('[apiPost] Requesting:', fullUrl);
+    var headers = {
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Content-Type': 'application/json; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest'
+    };
+    // Pass page referer so the CORS proxy can set the correct Referer header
+    if (_currentPageReferer) {
+        headers['X-ELearn-Referer'] = _currentPageReferer;
+    }
     return fetch(fullUrl, {
         method: 'POST',
-        headers: {
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Content-Type': 'application/json; charset=UTF-8',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
+        headers: headers,
         body: JSON.stringify(data || {}),
         mode: 'cors',
         credentials: 'include'
@@ -117,13 +139,17 @@ function apiGet(url, data) {
         if (queryString) queryString = '?' + queryString;
     }
 
+    var headers = {
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Content-Type': 'application/json; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest'
+    };
+    if (_currentPageReferer) {
+        headers['X-ELearn-Referer'] = _currentPageReferer;
+    }
     return fetch(getApiBase() + url + queryString, {
         method: 'GET',
-        headers: {
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Content-Type': 'application/json; charset=UTF-8',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
+        headers: headers,
         mode: 'cors',
         credentials: 'include'
     })
@@ -206,8 +232,14 @@ function apiInitCourseContext(clid) {
     if (!clid || localStorage.getItem('elearn_mode') !== 'real') {
         return Promise.resolve();
     }
+    // Set the page referer for all subsequent STCoursepage calls
+    setPageReferer('STCoursepage.aspx?CLid=' + clid);
+    var primingHeaders = {
+        'X-ELearn-Referer': 'STCoursepage.aspx?CLid=' + clid
+    };
     var fetchPromise = fetch(getApiBase() + 'STCoursepage.aspx?CLid=' + encodeURIComponent(clid), {
         method: 'GET',
+        headers: primingHeaders,
         mode: 'cors',
         credentials: 'include'
     }).then(
@@ -232,8 +264,13 @@ function apiInitClassDetailContext(clid) {
     if (!clid || localStorage.getItem('elearn_mode') !== 'real') {
         return Promise.resolve();
     }
+    setPageReferer('STClassDetails.aspx?CLid=' + clid);
+    var primingHeaders = {
+        'X-ELearn-Referer': 'STClassDetails.aspx?CLid=' + clid
+    };
     var fetchPromise = fetch(getApiBase() + 'STClassDetails.aspx?CLid=' + encodeURIComponent(clid), {
         method: 'GET',
+        headers: primingHeaders,
         mode: 'cors',
         credentials: 'include'
     }).then(
@@ -253,8 +290,13 @@ function apiInitMeetingContext() {
     if (localStorage.getItem('elearn_mode') !== 'real') {
         return Promise.resolve();
     }
+    setPageReferer('STMeetingList.aspx');
+    var primingHeaders = {
+        'X-ELearn-Referer': 'STMeetingList.aspx'
+    };
     var fetchPromise = fetch(getApiBase() + 'STMeetingList.aspx', {
         method: 'GET',
+        headers: primingHeaders,
         mode: 'cors',
         credentials: 'include'
     }).then(
@@ -274,8 +316,13 @@ function apiInitChatContext() {
     if (localStorage.getItem('elearn_mode') !== 'real') {
         return Promise.resolve();
     }
+    setPageReferer('chat.aspx');
+    var primingHeaders = {
+        'X-ELearn-Referer': 'chat.aspx'
+    };
     var fetchPromise = fetch(getApiBase() + 'chat.aspx', {
         method: 'GET',
+        headers: primingHeaders,
         mode: 'cors',
         credentials: 'include'
     }).then(

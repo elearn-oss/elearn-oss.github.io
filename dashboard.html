@@ -433,6 +433,7 @@
     (function () {
         // ---- Auth & Init ----
         checkAuth();
+        setPageReferer('STClasslist.aspx');
 
         apiSetTime().catch(function (err) {
             console.warn('Time sync failed:', err);

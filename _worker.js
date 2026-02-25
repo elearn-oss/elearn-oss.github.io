@@ -32,7 +32,7 @@ const ALLOWED_ORIGIN = 'https://elearn-oss.github.io';
 const CORS_HEADERS = {
     'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Accept, X-Requested-With',
+    'Access-Control-Allow-Headers': 'Content-Type, Accept, X-Requested-With, X-ELearn-Referer',
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Max-Age': '86400',
 };
@@ -55,10 +55,30 @@ export default {
         const url = new URL(request.url);
         const targetUrl = TARGET + url.pathname + url.search;
 
-        // Forward the request, dropping Host and Origin headers to avoid conflicts.
+        // Forward the request, fixing headers so the university server sees
+        // what it expects (same-origin Referer & Origin, correct Host).
         const forwardHeaders = new Headers(request.headers);
         forwardHeaders.delete('Host');
-        forwardHeaders.delete('Origin');
+
+        // Set Origin to the real server (ASP.NET may validate this)
+        forwardHeaders.set('Origin', TARGET);
+
+        // Rewrite Referer: the browser sends our GitHub Pages / proxy URL,
+        // but ASP.NET Page Methods expect the Referer to be from the same
+        // domain. If the frontend passed X-ELearn-Referer, use that as
+        // the path; otherwise auto-generate from the request URL path.
+        var customReferer = forwardHeaders.get('X-ELearn-Referer');
+        forwardHeaders.delete('X-ELearn-Referer');
+        if (customReferer) {
+            forwardHeaders.set('Referer', TARGET + '/' + customReferer.replace(/^\//, ''));
+        } else {
+            var aspxMatch = url.pathname.match(/^(\/[^/]*\.aspx)/i);
+            if (aspxMatch) {
+                forwardHeaders.set('Referer', TARGET + aspxMatch[1]);
+            } else {
+                forwardHeaders.set('Referer', TARGET + url.pathname);
+            }
+        }
 
         const proxyRequest = new Request(targetUrl, {
             method: request.method,
