@@ -490,9 +490,16 @@
             ];
 
             var html = '';
+            let index_img = 0;
             courses.forEach(function (c, i) {
+
+                if(index_img >= 6) {
+                    index_img = 0;
+                }
+                
                 var name = escapeHtml(c.classname || '');
-                var imgSrc = c.CourseImage ? 'Images/CourseImages/' + encodeURIComponent(c.CourseImage) : '';
+                //var imgSrc = c.CourseImage ? 'Images/CourseImages/' + encodeURIComponent(c.CourseImage) : '';
+                var imgSrc = `Images/CourseImages/${index_img}.jpg`;
                 var msgCount = parseInt(c.messagecount, 10) || 0;
                 var learnCount = parseInt(c.learncount, 10) || 0;
                 var exCount = parseInt(c.Exercisecount, 10) || 0;
@@ -503,6 +510,8 @@
                 var tcGuid = c.TCInfoGuiID || '';
                 var grad = gradients[i % gradients.length];
                 var delay = (i * 0.06) + 's';
+
+                index_img++;
 
                 html += '<div class="course-card" style="animation-delay:' + delay + '" data-fallback="' + escapeHtml(grad) + '">';
                 html += '<div class="card-img-wrapper" style="' + (imgSrc ? '' : 'background:' + grad) + '">';
