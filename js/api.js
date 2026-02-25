@@ -14,6 +14,14 @@
 var API_BASE = 'https://elearn.uk.ac.ir/';
 
 /**
+ * Initialize default proxy URL if not already set.
+ * This ensures CORS requests work in real mode from the first page load.
+ */
+if (!localStorage.getItem('elearn_proxy_url')) {
+    localStorage.setItem('elearn_proxy_url', 'https://elearn-cors-proxy.elearn-oss.workers.dev');
+}
+
+/**
  * Maximum time (ms) to wait for the course-context priming GET before
  * proceeding with course API calls anyway (best-effort).
  */
